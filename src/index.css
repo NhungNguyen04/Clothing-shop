@@ -25,3 +25,10 @@ a.active hr {
   }
 }
 
+select,
+select option {
+    font-family: 'Outfit', sans-serif !important;
+    -webkit-font-family: 'Outfit', sans-serif !important;
+    -moz-font-family: 'Outfit', sans-serif !important;
+}
+
