@@ -1,11 +1,12 @@
 import React, { useContext, useEffect, useState } from 'react'
-import { useParams } from 'react-router-dom'
+import { useNavigate, useParams } from 'react-router-dom'
 import { ShopContext } from '../context/ShopContext';
 import { assets } from '../assets/assets';
 import RelatedProducts from '../components/RelatedProducts';
 
 const Product = () => {
   const { productId } = useParams();
+  const navigate = useNavigate();
   const { products, currency, addToCart } = useContext(ShopContext);
   const [ productData, setProductData ] = useState(false);
   const [ image, setImage ] = useState('');
@@ -73,8 +74,13 @@ const Product = () => {
             <p>Cash on delivery is available on this product.</p>
             <p>Easy return and exchange policy within 7 days.</p>
           </div>
+          {/* Try on section */}
+          <div className='mt-20'>
+              <button onClick={() => {navigate(`/try-on/${productId}`)}} className='bg-black text-white px-8 py-3 text-sm active:bg-gray-700'>Try on with AI</button>
+          </div>
         </div>
       </div>
+
       {/* ----------- Description & Review Section ----------------*/}
       <div className='mt-20'>
           <div className='flex'>
@@ -89,9 +95,9 @@ const Product = () => {
         
         {/* ---------- Display related products ----------*/}
         <RelatedProducts category={productData.category} subCategory={productData.subCategory}/>
-
     </div>
   ) : <div className='opacity-0'></div>
+
 }
 
 export default Product
