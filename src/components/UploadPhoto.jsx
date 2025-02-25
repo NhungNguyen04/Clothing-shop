@@ -11,32 +11,9 @@ const UploadPhoto = ({ onUpload }) => {
       const reader = new FileReader();
       reader.onloadend = () => {
         setPreview(reader.result);
+        onUpload && onUpload(reader.result); // Pass preview URL immediately
       };
       reader.readAsDataURL(file);
-    }
-  };
-
-  const handleUpload = async () => {
-    if (!selectedFile) return;
-
-    const formData = new FormData();
-    formData.append('photo', selectedFile);
-
-    try {
-      // Replace with your actual upload API endpoint
-      const response = await fetch('/api/upload', {
-        method: 'POST',
-        body: formData,
-      });
-      
-      if (response.ok) {
-        const data = await response.json();
-        onUpload && onUpload(data);
-        setSelectedFile(null);
-        setPreview(null);
-      }
-    } catch (error) {
-      console.error('Upload failed:', error);
     }
   };
 
@@ -51,9 +28,6 @@ const UploadPhoto = ({ onUpload }) => {
       {preview && (
         <div className="preview-container">
           <img src={preview} alt="Preview" className="image-preview" />
-          <button onClick={handleUpload} className="upload-button">
-            Upload Photo
-          </button>
         </div>
       )}
     </div>
