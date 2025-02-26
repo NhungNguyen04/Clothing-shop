@@ -1,9 +1,7 @@
-import React from 'react'
 import { Route, Routes } from 'react-router-dom'
 import Home from './pages/Home'
 import Collection from './pages/Collection'
 import About from './pages/About'
-import Contact from './pages/Contact'
 import Product from './pages/Product'
 import Cart from './pages/Cart'
 import Login from './pages/Login'
@@ -17,6 +15,7 @@ import { ToastContainer } from 'react-toastify'
 import TryOn from './pages/TryOn'
 import CheckOut from './pages/CheckOut'
 import ContactUs from './pages/ContactUs'
+import Register from './pages/Register'
 
 function App() {
   return (
@@ -33,6 +32,7 @@ function App() {
           <Route path="/cart" element={<Cart/>}></Route>
           <Route path="/check-out" element={<CheckOut/>}></Route>
           <Route path="/login" element={<Login/>}></Route>
+          <Route path="/register" element={<Register/>}></Route>
           <Route path="/place-order" element={<PlaceOrder/>}></Route>
           <Route path="/orders" element={<Orders/>}></Route>
           <Route path="/try-on/:productId" element={<TryOn/>}></Route>
