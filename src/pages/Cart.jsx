@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { GoTrash } from "react-icons/go";
 const initialCart = [
   { id: 1, name: "Men Round Neck Pure Cotton T-shirt", price: 149, size: "L", quantity: 1, image: "https://via.placeholder.com/60" },
@@ -6,6 +7,7 @@ const initialCart = [
 ];
 
 export default function Cart() {
+  const navigate = useNavigate();
   const [cart, setCart] = useState(initialCart);
   const shippingFee = 10;
 
@@ -45,7 +47,7 @@ export default function Cart() {
               min="1"
               />
             <div className="ml-4 cursor-pointer ">
-              <GoTrash/>
+              <GoTrash onClick={removeItem}/>
             </div>
           </div>
         ))}
@@ -67,7 +69,7 @@ export default function Cart() {
           <span>Total</span>
           <span>${total.toFixed(2)}</span>
         </div>
-        <button className="w-1/2 ml-auto block mt-4 text-[12px] bg-black text-white py-2 rounded hover:bg-gray-800">
+        <button className="w-1/2 ml-auto block mt-4 text-[12px] bg-black text-white py-2 rounded hover:bg-gray-800" onClick={() => navigate('/check-out')}>
           PROCEED TO CHECKOUT
         </button>
       </div>

@@ -16,6 +16,8 @@ import TryOn from './pages/TryOn'
 import CheckOut from './pages/CheckOut'
 import ContactUs from './pages/ContactUs'
 import Register from './pages/Register'
+import AuthSuccess from './pages/AuthSuccess'
+import AuthError from './pages/AuthError'
 
 function App() {
   return (
@@ -36,6 +38,8 @@ function App() {
           <Route path="/place-order" element={<PlaceOrder/>}></Route>
           <Route path="/orders" element={<Orders/>}></Route>
           <Route path="/try-on/:productId" element={<TryOn/>}></Route>
+          <Route path="/auth-success" element={<AuthSuccess />} />
+          <Route path="/auth-error" element={<AuthError />} />
         </Routes>
         <Footer />
     </div>
