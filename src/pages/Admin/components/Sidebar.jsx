@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
 import { FaHome, FaBox, FaShoppingCart, FaUsers, FaDollarSign, FaUser, FaStar, FaCog, FaBars } from "react-icons/fa";
-
+import { assets } from '@/assets/assets'
 const menuItems = [
   { name: "Dashboard", icon: <FaHome />, link: "#" },
   { name: "Products", icon: <FaBox />, subMenu: ["Product Item", "Category"] },
@@ -30,7 +30,8 @@ export default function Sidebar() {
       className="h-screen bg-white shadow-md flex flex-col overflow-hidden"
     >      
       <div className="flex items-center justify-between p-4">
-        <h1 className={`text-2xl font-bold text-green-600 ${!isOpen && "hidden"}`}>Evara</h1>
+        {/* <h1 className={`text-2xl font-bold text-green-600 ${!isOpen && "hidden"}`}>Evara</h1> */}
+        <img src={assets.logo} alt="" className='w-36 cursor-pointer'/>
         <button onClick={() => setIsOpen(!isOpen)}>
           <FaBars size={24} />
         </button>

@@ -1,11 +1,16 @@
 import AdminLayout from "./components/AdminLayout";
+import Chart from "./components/Chart";
+import OrdersList from "./components/OrderList";
 
 export default function Dashboard() {
   
 
   return (
     <AdminLayout>
-        <div>Hello World</div>
+        <div>
+            <Chart/>
+            <OrdersList/>
+        </div>
     </AdminLayout>
   );
 }
