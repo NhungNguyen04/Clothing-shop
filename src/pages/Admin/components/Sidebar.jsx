@@ -20,9 +20,9 @@ const menuItems = [
     ] },
   { name: "Transactions", icon: <FaDollarSign />, link: "/admin/transactions" },
   { name: "Account", icon: <FaUser />, subMenu: [
-      { name: "Seller Account", link: "/admin/account" },
-      { name: "Customer Account", link: "/admin/account" },
-      { name: "Admin Account", link: "/admin/account" }
+      { name: "Seller Account", link: "/admin/seller-accounts" },
+      { name: "Customer Account", link: "/admin/customer-accounts" },
+      { name: "Admin Account", link: "/admin/admin-accounts" }
     ] },
   { name: "Reviews", icon: <FaStar />, link: "/admin/review" },
   { name: "Settings", icon: <FaCog />, link: "/admin/settings" },
