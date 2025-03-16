@@ -18,30 +18,44 @@ import ContactUs from './pages/ContactUs'
 import Register from './pages/Register'
 import AuthSuccess from './pages/AuthSuccess'
 import AuthError from './pages/AuthError'
+import Dashboard from './pages/Admin/Dashboard'
+import { useLocation } from 'react-router-dom'
+import ProductList from './pages/Admin/Products'
+import CategoryPage from './pages/Admin/Category'
+import SellerCard from './pages/Admin/Sellers'
+import SellerList from './pages/Admin/components/SellerList'
 
 function App() {
+  const location = useLocation();
+  const isAdminRoute = location.pathname.startsWith('/admin');
+
   return (
-    <div className='px-4 sm:px-[5vw] md:px-[7vw] lg:px-[9vw]'>
+    <div className={isAdminRoute ? '' : 'px-4 sm:px-[5vw] md:px-[7vw] lg:px-[9vw]'}>
       <ToastContainer />
-      <Navbar/>
-      <SearchBar/>
+      {!isAdminRoute && <Navbar />}
+      {!isAdminRoute && <SearchBar />}
         <Routes>
-          <Route path="/" element={<Home/>}></Route>
-          <Route path="/collection" element={<Collection/>}></Route>
-          <Route path="/about" element={<About/>}></Route>
-          <Route path="/contact" element={<ContactUs/>}></Route>
-          <Route path="/product/:productId" element={<Product/>}></Route>
-          <Route path="/cart" element={<Cart/>}></Route>
-          <Route path="/check-out" element={<CheckOut/>}></Route>
-          <Route path="/login" element={<Login/>}></Route>
-          <Route path="/register" element={<Register/>}></Route>
-          <Route path="/place-order" element={<PlaceOrder/>}></Route>
-          <Route path="/orders" element={<Orders/>}></Route>
-          <Route path="/try-on/:productId" element={<TryOn/>}></Route>
+          <Route path="/" element={<Home />} />
+          <Route path="/collection" element={<Collection />} />
+          <Route path="/about" element={<About />} />
+          <Route path="/contact" element={<ContactUs />} />
+          <Route path="/product/:productId" element={<Product />} />
+          <Route path="/cart" element={<Cart />} />
+          <Route path="/check-out" element={<CheckOut />} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/register" element={<Register />} />
+          <Route path="/place-order" element={<PlaceOrder />} />
+          <Route path="/orders" element={<Orders />} />
+          <Route path="/try-on/:productId" element={<TryOn />} />
           <Route path="/auth-success" element={<AuthSuccess />} />
           <Route path="/auth-error" element={<AuthError />} />
+          <Route path="/admin/dashboard" element={<Dashboard />} />
+          <Route path="/admin/products" element={<ProductList />} />
+          <Route path="/admin/category" element={<CategoryPage />} />
+          <Route path="/admin/seller-list" element={<SellerList/>} />
+          <Route path="/admin/seller-card" element={<SellerCard />} />
         </Routes>
-        <Footer />
+      {!isAdminRoute && <Footer />}
     </div>
   )
 }
