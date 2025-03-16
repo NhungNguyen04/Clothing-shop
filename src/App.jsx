@@ -28,6 +28,7 @@ import OrderList from './pages/Admin/OrderList'
 import Invoice from './pages/Admin/Invoice'
 import Transactions from './pages/Admin/Transactions'
 import AccountPage from './pages/Admin/Accounts'
+import ReviewsPage from './pages/Admin/Reviews'
 
 function App() {
   const location = useLocation();
@@ -64,6 +65,7 @@ function App() {
           <Route path="/admin/seller-accounts" element={<AccountPage type="seller" />} />
           <Route path="/admin/customer-accounts" element={<AccountPage type="customer" />} />
           <Route path="/admin/admin-accounts" element={<AccountPage type="admin" />} />
+          <Route path="/admin/reviews" element={<ReviewsPage/>} />
         </Routes>
       {!isAdminRoute && <Footer />}
     </div>
