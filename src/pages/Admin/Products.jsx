@@ -1,5 +1,6 @@
 import { useState } from "react";
 import AdminLayout from "./components/AdminLayout";
+import ProductTable from "./components/ProductTable";
 
 export default function ProductList() {
   const [isOpen, setIsOpen] = useState(false);
@@ -7,7 +8,6 @@ export default function ProductList() {
   return (
     <AdminLayout>
         <div className="p-6 bg-gray-50 min-h-screen">
-            {/* Header */}
             <div className="flex justify-between items-center">
                 <div>
                 <h2 className="text-2xl font-semibold">Products List</h2>
@@ -24,8 +24,6 @@ export default function ProductList() {
                 </button>
                 </div>
             </div>
-
-            {/* Modal for Adding Product */}
             {isOpen && (
                 <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-30">
                 <div className="bg-white p-6 rounded shadow-lg w-1/3">
@@ -64,6 +62,9 @@ export default function ProductList() {
                 </div>
                 </div>
             )}
+            <div>
+                <ProductTable></ProductTable>
+            </div>
         </div>
     </AdminLayout>
   );

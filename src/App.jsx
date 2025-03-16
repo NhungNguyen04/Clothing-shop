@@ -21,6 +21,7 @@ import AuthError from './pages/AuthError'
 import Dashboard from './pages/Admin/Dashboard'
 import { useLocation } from 'react-router-dom'
 import ProductList from './pages/Admin/Products'
+import CategoryPage from './pages/Admin/Category'
 
 function App() {
   const location = useLocation();
@@ -48,6 +49,7 @@ function App() {
           <Route path="/auth-error" element={<AuthError />} />
           <Route path="/admin/dashboard" element={<Dashboard />} />
           <Route path="/admin/products" element={<ProductList />} />
+          <Route path="/admin/category" element={<CategoryPage />} />
         </Routes>
       {!isAdminRoute && <Footer />}
     </div>

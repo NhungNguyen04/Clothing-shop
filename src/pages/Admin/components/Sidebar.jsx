@@ -1,74 +1,72 @@
 import { useState } from "react";
-import { motion } from "framer-motion";
-import { FaHome, FaBox, FaShoppingCart, FaUsers, FaDollarSign, FaUser, FaStar, FaCog, FaBars } from "react-icons/fa";
-import { assets } from '@/assets/assets'
-const menuItems = [
-  { name: "Dashboard", icon: <FaHome />, link: "#" },
-  { name: "Products", icon: <FaBox />, subMenu: ["Product Item", "Category"] },
-  { name: "Orders", icon: <FaShoppingCart />, subMenu: ["Order List", "Invoice"] },
-  { name: "Sellers", icon: <FaUsers />, subMenu: ["Seller List", "Seller Card"] },
-  { name: "Transactions", icon: <FaDollarSign />, subMenu: [] },
-  { name: "Account", icon: <FaUser />, subMenu: ["Seller Account", "Customer Account", "Admin Account"] },
-  { name: "Reviews", icon: <FaStar />, link: "#" },
-  { name: "Settings", icon: <FaCog />, subMenu: [] },
-  { name: "Starter page", icon: <FaStar />, link: "#" },
+import { FaEllipsisV } from "react-icons/fa";
+
+const categories = [
+  { id: 21, name: "Men clothes", description: "Men clothes", slug: "/men", order: 1 },
+  { id: 2, name: "Women fashion", description: "Fashions for Women", slug: "/women", order: 2 },
+  { id: 3, name: "Kids clothes", description: "Clothes for kids", slug: "/kids", order: 3 },
+  { id: 4, name: "Hot Gifts", description: "Hot Gifts", slug: "/gifts", order: 4 },
+  { id: 5, name: "Electronics", description: "Electronics", slug: "/electr", order: 5 },
+  { id: 6, name: "Accessories", description: "Accessories", slug: "/accessories", order: 6 },
+  { id: 7, name: "Jewellery", description: "Jewellery", slug: "/jewel", order: 7 },
+  { id: 8, name: "Interiors", description: "Interiors", slug: "/interior", order: 8 },
 ];
 
-export default function Sidebar() {
-  const [isOpen, setIsOpen] = useState(true);
-  const [openMenus, setOpenMenus] = useState({});
-
-  const toggleMenu = (menuName) => {
-    setOpenMenus((prev) => ({ ...prev, [menuName]: !prev[menuName] }));
-  };
+export default function CategoryPage() {
+  const [dropdownOpen, setDropdownOpen] = useState(null);
 
   return (
-    <motion.div 
-      initial={{ width: "16rem" }} 
-      animate={{ width: isOpen ? "16rem" : "4rem" }} 
-      transition={{ duration: 0.3 }}
-      className="h-screen bg-white shadow-md flex flex-col overflow-hidden"
-    >      
-      <div className="flex items-center justify-between p-4">
-        {/* <h1 className={`text-2xl font-bold text-green-600 ${!isOpen && "hidden"}`}>Evara</h1> */}
-        <img src={assets.logo} alt="" className='w-36 cursor-pointer'/>
-        <button onClick={() => setIsOpen(!isOpen)}>
-          <FaBars size={24} />
-        </button>
+    <div className="p-6 max-w-6xl mx-auto">
+      <h1 className="text-3xl font-semibold">Categories</h1>
+      <p className="text-gray-500">Add, edit or delete a category</p>
+      
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4 bg-white p-4 shadow-md rounded-md">
+        <input type="text" placeholder="Type here" className="p-2 border rounded" />
+        <input type="text" placeholder="Type here" className="p-2 border rounded" />
+        <select className="p-2 border rounded">
+          <option>Clothes</option>
+        </select>
+        <textarea placeholder="Type here" className="p-2 border rounded col-span-3"></textarea>
+        <button className="bg-green-600 text-white p-2 rounded col-span-3">Create category</button>
       </div>
-      <nav className="flex-1 flex flex-col justify-center mt-4">
-        {menuItems.map((item, index) => (
-          <div key={index} className="w-full">
-            <button
-              className="flex items-center p-3 w-full hover:bg-gray-200 rounded-md transition justify-start"
-              onClick={() => item.subMenu && toggleMenu(item.name)}
-            >
-              <span className="text-gray-600">{item.icon}</span>
-              <motion.span 
-                initial={{ opacity: 0, x: -20 }} 
-                animate={{ opacity: isOpen ? 1 : 0, x: isOpen ? 0 : -20 }}
-                transition={{ duration: 0.2 }}
-                className={`ml-3 text-gray-800 ${!isOpen && "hidden"}`}
-              >
-                {item.name}
-              </motion.span>
-              {item.subMenu && <span className="ml-auto">▼</span>}
-            </button>
-            {item.subMenu && (
-              <motion.div 
-                initial={{ height: 0, opacity: 0 }}
-                animate={{ height: openMenus[item.name] ? "auto" : 0, opacity: openMenus[item.name] ? 1 : 0 }}
-                transition={{ duration: 0.3 }}
-                className="ml-6 overflow-hidden"
-              >
-                {item.subMenu.map((sub, i) => (
-                  <a href="#" key={i} className="block p-2 text-gray-600 hover:text-gray-800">{sub}</a>
-                ))}
-              </motion.div>
-            )}
-          </div>
-        ))}
-      </nav>
-    </motion.div>
+      
+      <div className="mt-6 bg-white shadow rounded-md p-4">
+        <table className="w-full border-collapse">
+          <thead>
+            <tr className="bg-gray-100">
+              <th className="p-3 text-center"><input type="checkbox" /></th>
+              <th className="p-3 text-center">ID</th>
+              <th className="p-3 text-left">Description</th>
+              <th className="p-3 text-left">Slug</th>
+              <th className="p-3">Order</th>
+              <th className="p-3">Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            {categories.map((category) => (
+              <tr key={category.id} className="border-t hover:bg-gray-50">
+                <td className="p-3 text-center">{category.id}</td>
+                <td className="p-3">{category.name}</td>
+                <td className="p-3">{category.description}</td>
+                <td className="p-3">{category.slug}</td>
+                <td className="p-3 text-center">{category.order}</td>
+                <td className="p-3 text-center relative">
+                  <button onClick={() => setDropdownOpen(dropdownOpen === category.id ? null : category.id)}
+                    className="p-2 rounded hover:bg-gray-200">
+                    <FaEllipsisV />
+                  </button>
+                  {dropdownOpen === category.id && (
+                    <div className="absolute right-5 bg-white border shadow-md rounded w-24">
+                      <button className="block px-4 py-2 hover:bg-gray-100 w-full">Edit</button>
+                      <button className="block px-4 py-2 text-red-600 hover:bg-gray-100 w-full">Delete</button>
+                    </div>
+                  )}
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </div>
   );
 }
