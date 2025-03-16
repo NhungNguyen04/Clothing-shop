@@ -24,6 +24,8 @@ import ProductList from './pages/Admin/Products'
 import CategoryPage from './pages/Admin/Category'
 import SellerCard from './pages/Admin/Sellers'
 import SellerList from './pages/Admin/components/SellerList'
+import OrderList from './pages/Admin/OrderList'
+import Invoice from './pages/Admin/Invoice'
 
 function App() {
   const location = useLocation();
@@ -54,6 +56,8 @@ function App() {
           <Route path="/admin/category" element={<CategoryPage />} />
           <Route path="/admin/seller-list" element={<SellerList/>} />
           <Route path="/admin/seller-card" element={<SellerCard />} />
+          <Route path="/admin/order-list" element={<OrderList />} />
+          <Route path="/admin/invoice" element={<Invoice />} />
         </Routes>
       {!isAdminRoute && <Footer />}
     </div>

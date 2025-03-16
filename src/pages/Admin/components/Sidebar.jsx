@@ -1,8 +1,8 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { FaHome, FaBox, FaShoppingCart, FaUsers, FaDollarSign, FaUser, FaStar, FaCog, FaBars } from "react-icons/fa";
 import { assets } from '@/assets/assets';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 
 const menuItems = [
   { name: "Dashboard", icon: <FaHome />, link: "/admin/dashboard" },
@@ -32,6 +32,17 @@ const menuItems = [
 export default function Sidebar() {
   const [isOpen, setIsOpen] = useState(true);
   const [openMenus, setOpenMenus] = useState({});
+  const location = useLocation();
+
+  useEffect(() => {
+    const newOpenMenus = {};
+    menuItems.forEach(item => {
+      if (item.subMenu) {
+        newOpenMenus[item.name] = item.subMenu.some(sub => sub.link === location.pathname);
+      }
+    });
+    setOpenMenus(newOpenMenus);
+  }, [location.pathname]);
 
   const toggleMenu = (menuName) => {
     setOpenMenus((prev) => ({ ...prev, [menuName]: !prev[menuName] }));
@@ -50,13 +61,15 @@ export default function Sidebar() {
           <FaBars size={24} />
         </button>
       </div>
-      <nav className="flex-1 flex flex-col justify-center mt-4">
+      <nav className="flex-1 flex flex-col mt-4">
         {menuItems.map((item, index) => (
           <div key={index} className="w-full">
             {item.subMenu ? (
               <>
                 <button
-                  className="flex items-center p-3 w-full hover:bg-gray-200 rounded-md transition justify-start"
+                  className={`flex items-center p-3 w-full rounded-md transition justify-start ${
+                    openMenus[item.name] ? "bg-gray-200" : "hover:bg-gray-100"
+                  }`}
                   onClick={() => toggleMenu(item.name)}
                 >
                   <span className="text-gray-600">{item.icon}</span>
@@ -68,7 +81,7 @@ export default function Sidebar() {
                   >
                     {item.name}
                   </motion.span>
-                  <span className="ml-auto">▼</span>
+                  <span className="ml-auto">{openMenus[item.name] ? "▲" : "▼"}</span>
                 </button>
                 <motion.div 
                   initial={{ height: 0, opacity: 0 }}
@@ -77,12 +90,25 @@ export default function Sidebar() {
                   className="ml-6 overflow-hidden"
                 >
                   {item.subMenu.map((sub, i) => (
-                    <Link to={sub.link} key={i} className="block p-2 text-gray-600 hover:text-gray-800">{sub.name}</Link>
+                    <Link
+                      to={sub.link}
+                      key={i}
+                      className={`block p-2 rounded text-gray-600 hover:text-gray-800 ${
+                        location.pathname === sub.link ? "bg-green-100 text-green-700 font-semibold" : ""
+                      }`}
+                    >
+                      {sub.name}
+                    </Link>
                   ))}
                 </motion.div>
               </>
             ) : (
-              <Link to={item.link} className="flex items-center p-3 w-full hover:bg-gray-200 rounded-md transition justify-start">
+              <Link 
+                to={item.link} 
+                className={`flex items-center p-3 w-full rounded-md transition justify-start ${
+                  location.pathname === item.link ? "bg-green-100 text-green-700 font-semibold" : "hover:bg-gray-100"
+                }`}
+              >
                 <span className="text-gray-600">{item.icon}</span>
                 <motion.span 
                   initial={{ opacity: 0, x: -20 }} 
