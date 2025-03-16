@@ -22,6 +22,8 @@ import Dashboard from './pages/Admin/Dashboard'
 import { useLocation } from 'react-router-dom'
 import ProductList from './pages/Admin/Products'
 import CategoryPage from './pages/Admin/Category'
+import SellerCard from './pages/Admin/Sellers'
+import SellerList from './pages/Admin/components/SellerList'
 
 function App() {
   const location = useLocation();
@@ -50,6 +52,8 @@ function App() {
           <Route path="/admin/dashboard" element={<Dashboard />} />
           <Route path="/admin/products" element={<ProductList />} />
           <Route path="/admin/category" element={<CategoryPage />} />
+          <Route path="/admin/seller-list" element={<SellerList/>} />
+          <Route path="/admin/seller-card" element={<SellerCard />} />
         </Routes>
       {!isAdminRoute && <Footer />}
     </div>
