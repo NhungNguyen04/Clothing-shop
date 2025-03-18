@@ -28,12 +28,8 @@ import OrderList from './pages/Admin/OrderList'
 import Invoice from './pages/Admin/Invoice'
 import Transactions from './pages/Admin/Transactions'
 import AccountPage from './pages/Admin/Accounts'
-<<<<<<< HEAD
 import Reviews from './pages/Admin/Reviews'
 import SellerProfile from './pages/Admin/SellerProfile'
-=======
-import ReviewsPage from './pages/Admin/Reviews'
->>>>>>> 8490ff06aefda2ba4b6c1ff181ee9e4efa9b5e22
 
 function App() {
   const location = useLocation();
@@ -71,11 +67,7 @@ function App() {
           <Route path="/admin/seller-accounts" element={<AccountPage type="seller" />} />
           <Route path="/admin/customer-accounts" element={<AccountPage type="customer" />} />
           <Route path="/admin/admin-accounts" element={<AccountPage type="admin" />} />
-<<<<<<< HEAD
           <Route path="/admin/reviews" element={<Reviews/>} />
-=======
-          <Route path="/admin/reviews" element={<ReviewsPage/>} />
->>>>>>> 8490ff06aefda2ba4b6c1ff181ee9e4efa9b5e22
         </Routes>
       {!isAdminRoute && <Footer />}
     </div>
