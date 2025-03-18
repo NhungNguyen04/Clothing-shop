@@ -24,7 +24,7 @@ const menuItems = [
       { name: "Customer Account", link: "/admin/customer-accounts" },
       { name: "Admin Account", link: "/admin/admin-accounts" }
     ] },
-  { name: "Reviews", icon: <FaStar />, link: "/admin/review" },
+  { name: "Reviews", icon: <FaStar />, link: "/admin/reviews" },
   { name: "Settings", icon: <FaCog />, link: "/admin/settings" },
   { name: "Starter Page", icon: <FaStar />, link: "/admin/starter-page" }
 ];
