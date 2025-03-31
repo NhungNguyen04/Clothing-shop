@@ -11,7 +11,7 @@ const categories = {
 
 const sizes = ["S", "M", "L", "XL", "XXL"];
 
-const ProductForm = ({ isOpen, setIsOpen, onSubmit }) => {
+const ProductForm = ({ isOpen, setIsOpen, onSubmit, initialData }) => {
   const {
     register,
     handleSubmit,
@@ -21,11 +21,42 @@ const ProductForm = ({ isOpen, setIsOpen, onSubmit }) => {
     watch,
   } = useForm();
 
-  const [mainImage, setMainImage] = useState(null);
-  const [subImages, setSubImages] = useState([null, null, null, null]);
-  const [sizeStock, setSizeStock] = useState({});
+  const [mainImage, setMainImage] = useState(initialData?.image?.[0] ?? null);
+  const [subImages, setSubImages] = useState(() => {
+    const images = initialData?.image?.slice(1, 5) ?? [];
+    return images.concat(Array(4 - images.length).fill(null));
+  });
+  const [sizeStock, setSizeStock] = useState(() => {
+    return initialData.stockSize?.reduce((acc, item) => {
+      acc[item.size] = item.quantity;
+      return acc;
+    }, {}) || {};
+  });
+  const selectedSizes = useWatch({
+    control,
+    name: "sizes",
+    defaultValue: Object.keys(sizeStock),
+  });
 
-  const selectedSizes = useWatch({ control, name: "sizes", defaultValue: [] });
+  const selectedCategory = watch("category");
+
+  useEffect(() => {
+    if (Object.keys(initialData).length > 0) {
+      setValue("name", initialData.name || "");
+      setValue("price", parseFloat(initialData.price.replace(/[^0-9.]/g, "")) || "");
+      setValue("description", initialData.description || "");
+      setValue("category", initialData.category || "");
+      setValue("subCategory", initialData.subCategory || "");
+    }
+  }, [initialData, setValue]);
+
+  useEffect(() => {
+    if (selectedCategory) {
+      setValue("subCategory", categories[selectedCategory]?.[0] || "");
+    } else {
+      setValue("subCategory", "");
+    }
+  }, [selectedCategory, setValue]);
 
   useEffect(() => {
     setSizeStock((prevSizeStock) => {
@@ -77,6 +108,7 @@ const ProductForm = ({ isOpen, setIsOpen, onSubmit }) => {
     onSubmit({ ...data, sizeStock });
     setIsOpen(false);
   };
+
 
   if (!isOpen) return null;
 
@@ -140,7 +172,13 @@ const ProductForm = ({ isOpen, setIsOpen, onSubmit }) => {
             <div className="flex space-x-2 mt-2">
               {sizes.map((size) => (
                 <label key={size} className="flex items-center space-x-2">
-                  <input type="checkbox" {...register("sizes")} value={size} className="w-4 h-4" />
+                  <input
+                    type="checkbox"
+                    {...register("sizes")}
+                    value={size}
+                    defaultChecked={!!sizeStock[size]}
+                    className="w-4 h-4"
+                  />
                   <span>{size}</span>
                 </label>
               ))}
@@ -196,6 +234,7 @@ ProductForm.propTypes = {
   isOpen: PropTypes.bool.isRequired,
   setIsOpen: PropTypes.func.isRequired,
   onSubmit: PropTypes.func.isRequired,
+  initialData: PropTypes.object.isRequired,
 };
 
 export default ProductForm;

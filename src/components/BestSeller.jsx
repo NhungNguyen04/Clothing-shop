@@ -1,18 +1,26 @@
-import React, { useContext, useEffect, useState } from 'react'
-import { ShopContext } from '../context/ShopContext'
+import { useState, useEffect, useCallback } from 'react';
 import Title from './Title';
 import ProductItem from './ProductItem';
+import axiosInstance from '../api/axiosInstance';
 
 const BestSeller = () => {
-
-  const { products } = useContext(ShopContext);
   const [bestSeller, setBestSeller] = useState([]);
 
-  useEffect(() => {
-    const bestProducts = products.filter((product) => (product.bestseller));
-    setBestSeller(bestProducts.slice(0, 5));
+  const fetchBestSellers = useCallback(async () => {
+    try {
+      const response = await axiosInstance.get('/products');
+      const bestProducts = response.data.data
+      const shuffled = bestProducts.sort(() => 0.5 - Math.random());
+      setBestSeller(shuffled.slice(0, 5));
+    } catch (error) {
+      console.error('Error fetching best sellers:', error);
+    }
   }, []);
 
+  useEffect(() => {
+    fetchBestSellers();
+  }, [fetchBestSellers]);
+  
   return (
     <div className='my-10'>
       <div className='text-center text-3xl py-8'>
@@ -24,19 +32,19 @@ const BestSeller = () => {
 
       <div className='grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 gap-y-6'>
         {
-          bestSeller.map((product, index) => (
+          bestSeller.map((product) => (
             <ProductItem
-              key={index}
-              id={product._id}
+              key={product.id}
+              id={product.id}
               image={product.image}
               name={product.name}
               price={product.price}
             />
-          )
-        )}
+          ))
+        }
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default BestSeller
+export default BestSeller;

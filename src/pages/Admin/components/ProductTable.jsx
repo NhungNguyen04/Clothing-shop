@@ -5,7 +5,7 @@ import { motion, AnimatePresence } from "framer-motion";
 const ITEMS_PER_PAGE = 6;
 
 // eslint-disable-next-line react/prop-types
-export default function ProductTable({ data }) {
+export default function ProductTable({ data, setIsOpen, setInitialData }) {
   const [dropdownOpen, setDropdownOpen] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
 
@@ -14,13 +14,23 @@ export default function ProductTable({ data }) {
     id: item.id,
     name: item.name,
     price: `$${item.price.toFixed(2)}`,
+    category: item.category,
+    subCategory: item.subCategory,
+    stockSize: item.stockSize,
     status: item.stockQuantity > 0 ? "Active" : "Out of Stock",
     date: new Date(item.createdAt).toLocaleDateString(),
-    image: item.image[0] || "",
+    image: item.image,
+    description: item.description,
   }));
 
+  const handleEdit = (data) => {
+    setIsOpen(true)
+    setDropdownOpen(false)
+    setInitialData(data)
+  }
+
   const totalPages = Math.ceil(formattedProducts.length / ITEMS_PER_PAGE);
-  const currentProducts = formattedProducts.slice(
+  const currentProducts = formattedProducts.length > 0 && formattedProducts.slice(
     (currentPage - 1) * ITEMS_PER_PAGE,
     currentPage * ITEMS_PER_PAGE
   );
@@ -39,7 +49,7 @@ export default function ProductTable({ data }) {
         </thead>
         <tbody>
           <AnimatePresence>
-            {currentProducts.map((product) => (
+            {currentProducts.length > 0 && currentProducts.map((product) => (
               <motion.tr
                 key={product.id}
                 className="border-b hover:bg-gray-50"
@@ -50,7 +60,7 @@ export default function ProductTable({ data }) {
               >
                 <td className="p-3 flex items-center">
                   <img
-                    src={product.image}
+                    src={product.image[0]}
                     alt={product.name}
                     className="w-[50px] h-[50px] rounded mr-3"
                   />
@@ -80,7 +90,7 @@ export default function ProductTable({ data }) {
                   </button>
                   {dropdownOpen === product.id && (
                     <div className="absolute right-5 bg-white border border-gray-200 shadow-md rounded-lg w-32 z-20">
-                      <button className="flex items-center px-4 py-2 hover:bg-gray-100 w-full text-left">
+                      <button onClick={() => handleEdit(product)} className="flex items-center px-4 py-2 hover:bg-gray-100 w-full text-left">
                         <FaEdit className="mr-2 text-blue-500" /> Edit
                       </button>
                       <button className="flex items-center px-4 py-2 hover:bg-gray-100 w-full text-left text-red-600">

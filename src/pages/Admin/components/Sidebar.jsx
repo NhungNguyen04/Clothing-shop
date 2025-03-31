@@ -3,50 +3,63 @@ import { motion } from "framer-motion";
 import { FaHome, FaBox, FaShoppingCart, FaUsers, FaDollarSign, FaUser, FaStar, FaCog, FaBars } from "react-icons/fa";
 import { assets } from '@/assets/assets';
 import { Link, useLocation } from 'react-router-dom';
+import useAuth from "../../../hooks/useAuth";
 
-const menuItems = [
-  { name: "Dashboard", icon: <FaHome />, link: "/admin/dashboard" },
-  { name: "Products", icon: <FaBox />, subMenu: [
-      { name: "Product Items", link: "/admin/products" },
-      { name: "Category", link: "/admin/category" }
-    ] },
-  { name: "Orders", icon: <FaShoppingCart />, subMenu: [
-      { name: "Order List", link: "/admin/order-list" },
-      { name: "Invoice", link: "/admin/invoice" }
-    ] },
-  { name: "Sellers", icon: <FaUsers />, subMenu: [
-      { name: "Seller List", link: "/admin/seller-list" },
-      { name: "Seller Card", link: "/admin/seller-card" }
-    ] },
-  { name: "Transactions", icon: <FaDollarSign />, link: "/admin/transactions" },
-  { name: "Account", icon: <FaUser />, subMenu: [
-      { name: "Seller Account", link: "/admin/seller-accounts" },
-      { name: "Customer Account", link: "/admin/customer-accounts" },
-      { name: "Admin Account", link: "/admin/admin-accounts" }
-    ] },
-  { name: "Reviews", icon: <FaStar />, link: "/admin/reviews" },
-  { name: "Settings", icon: <FaCog />, link: "/admin/settings" },
-  { name: "Starter Page", icon: <FaStar />, link: "/admin/starter-page" }
-];
+const menuItems = {
+  admin: [
+    { name: "Dashboard", icon: <FaHome />, link: "/admin/dashboard" },
+    { name: "Products", icon: <FaBox />, subMenu: [
+        { name: "Product Items", link: "/admin/products" },
+        { name: "Category", link: "/admin/category" }
+      ] },
+    { name: "Orders", icon: <FaShoppingCart />, subMenu: [
+        { name: "Order List", link: "/admin/order-list" },
+        { name: "Invoice", link: "/admin/invoice" }
+      ] },
+    { name: "Sellers", icon: <FaUsers />, subMenu: [
+        { name: "Seller List", link: "/admin/seller-list" },
+        { name: "Seller Card", link: "/admin/seller-card" }
+      ] },
+    { name: "Transactions", icon: <FaDollarSign />, link: "/admin/transactions" },
+    { name: "Account", icon: <FaUser />, subMenu: [
+        { name: "Seller Account", link: "/admin/seller-accounts" },
+        { name: "Customer Account", link: "/admin/customer-accounts" },
+        { name: "Admin Account", link: "/admin/admin-accounts" }
+      ] },
+    { name: "Reviews", icon: <FaStar />, link: "/admin/reviews" },
+    { name: "Settings", icon: <FaCog />, link: "/admin/settings" },
+  ],
+  seller: [
+    { name: "Dashboard", icon: <FaHome />, link: "/seller/dashboard" },
+    { name: "Products", icon: <FaBox />, link: "/seller/products" },
+    { name: "Orders", icon: <FaShoppingCart />, link: "/seller/orders" },
+    { name: "Transactions", icon: <FaDollarSign />, link: "/seller/transactions" },
+    { name: "Reviews", icon: <FaStar />, link: "/seller/reviews" },
+    { name: "Settings", icon: <FaCog />, link: "/seller/settings" },
+  ]
+};
 
 export default function Sidebar() {
   const [isOpen, setIsOpen] = useState(true);
   const [openMenus, setOpenMenus] = useState({});
   const location = useLocation();
+  const user = useAuth();
+  const role = user?.role;
 
   useEffect(() => {
     const newOpenMenus = {};
-    menuItems.forEach(item => {
+    const menu = role === "ADMIN" ? menuItems.admin : menuItems.seller;
+
+    menu.forEach(item => {
       if (item.subMenu) {
         newOpenMenus[item.name] = item.subMenu.some(sub => sub.link === location.pathname);
       }
     });
-    setOpenMenus(newOpenMenus);
-  }, [location.pathname]);
 
-  const toggleMenu = (menuName) => {
-    setOpenMenus((prev) => ({ ...prev, [menuName]: !prev[menuName] }));
-  };
+    setOpenMenus(newOpenMenus);
+  }, [location.pathname, role]);
+
+  if (!role) return null;
 
   return (
     <motion.div 
@@ -61,8 +74,9 @@ export default function Sidebar() {
           <FaBars size={24} />
         </button>
       </div>
+
       <nav className="flex-1 flex flex-col mt-4">
-        {menuItems.map((item, index) => (
+        {menuItems[role.toLowerCase()] && menuItems[role.toLowerCase()].map((item, index) => (
           <div key={index} className="w-full">
             {item.subMenu ? (
               <>
@@ -70,7 +84,7 @@ export default function Sidebar() {
                   className={`flex items-center p-3 w-full rounded-md transition justify-start ${
                     openMenus[item.name] ? "bg-gray-200" : "hover:bg-gray-100"
                   }`}
-                  onClick={() => toggleMenu(item.name)}
+                  onClick={() => setOpenMenus((prev) => ({ ...prev, [item.name]: !prev[item.name] }))}
                 >
                   <span className="text-gray-600">{item.icon}</span>
                   <motion.span 

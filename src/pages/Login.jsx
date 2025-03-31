@@ -14,9 +14,10 @@ const Login = () => {
     setLoading(true);
     try {
       const response = await axiosInstance.post("/auth/login", data);
-    localStorage.setItem("user", JSON.stringify(response.data.user));
       toast.success("Đăng nhập thành công");
+      localStorage.setItem("user", JSON.stringify(response.data.user));
       navigate("/");
+      window.location.reload()
     } catch (error) {
       toast.error("Đăng nhập thất bại. Vui lòng thử lại!");
       console.error("Login failed:", error.response?.data || error.message);

@@ -1,16 +1,23 @@
-import React, { useContext, useState, useEffect } from 'react'
-import { ShopContext } from '../context/ShopContext';
+import { useState, useEffect, useCallback } from 'react';
 import Title from './Title';
 import ProductItem from './ProductItem';
+import axiosInstance from '../api/axiosInstance';
 
 const LatestCollection = () => {
+  const [latestProducts, setLatestProducts] = useState([]);
 
-  const { products } = useContext(ShopContext);
-  const [latestProducts, setLatestProducts] = useState([]); // Fixed useState destructuring
+  const fetchProducts = useCallback(async () => {
+    try {
+      const response = await axiosInstance.get('/products');
+      setLatestProducts(response.data.data.slice(0, 10));
+    } catch (error) {
+      console.error('Error fetching products:', error);
+    }
+  }, []);
 
   useEffect(() => {
-    setLatestProducts(products.slice(0, 10));
-  }, []); // Added dependency array to prevent infinite loop
+    fetchProducts();
+  }, [fetchProducts]);
   
   return (
     <div className='my-10'>
@@ -21,23 +28,22 @@ const LatestCollection = () => {
         </p>
       </div>
 
-    {/* Rendering products */}
-    <div className='grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 gap-y-6'>
-      {
-        latestProducts.map((items, index) => (  // Added parentheses for implicit return
-          <ProductItem 
-            key={index} 
-            id={items._id} 
-            image={items.image} 
-            name={items.name} 
-            price={items.price}
-          />
-        ))
-      }
+      {/* Rendering products */}
+      <div className='grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 gap-y-6'>
+        {
+          latestProducts.map((item) => (
+            <ProductItem 
+              key={item.id} 
+              id={item.id} 
+              image={item.image} 
+              name={item.name} 
+              price={item.price}
+            />
+          ))
+        }
+      </div>
     </div>
+  );
+};
 
-    </div>
-  )
-}
-
-export default LatestCollection
+export default LatestCollection;

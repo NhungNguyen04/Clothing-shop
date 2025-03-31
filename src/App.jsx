@@ -28,20 +28,21 @@ import Invoice from './pages/Admin/Invoice';
 import Transactions from './pages/Admin/Transactions';
 import AccountPage from './pages/Admin/Accounts';
 import Reviews from './pages/Admin/Reviews';
-import SellerProfile from './pages/Admin/SellerProfile';
-import SellerRegister from './pages/SellerRegister';
 import useAuth from './hooks/useAuth';
+import Seller from './pages/Seller/Seller';
+import SellerProfile from './pages/Admin/SellerProfile';
 
 function App() {
   const location = useLocation();
   const isAdminRoute = location.pathname.startsWith('/admin');
+  const isSellerRoute = location.pathname.startsWith('/seller');
   const user = useAuth()
 
   return (
-    <div className={isAdminRoute ? '' : 'px-4 sm:px-[5vw] md:px-[7vw] lg:px-[9vw]'}>
+    <div className={isAdminRoute || isSellerRoute ? '' : 'px-4 sm:px-[5vw] md:px-[7vw] lg:px-[9vw]'}>
       <ToastContainer />
-      {!isAdminRoute && <Navbar />}
-      {!isAdminRoute && <SearchBar />}
+      {(!isAdminRoute && !isSellerRoute) && <Navbar />}
+      {(!isAdminRoute && !isSellerRoute) && <SearchBar />}
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/collection" element={<Collection />} />
@@ -54,27 +55,29 @@ function App() {
         <Route path="/register" element={<Register />} />
         <Route path="/place-order" element={<PlaceOrder />} />
         <Route path="/orders" element={<Orders />} />
-        <Route path="/seller-register" element={<SellerRegister />} />
         <Route path="/try-on/:productId" element={<TryOn />} />
         <Route path="/auth-success" element={<AuthSuccess />} />
         <Route path="/auth-error" element={<AuthError />} />
 
         {/* Admin Routes */}
         <Route path="/admin/dashboard" element={<Dashboard />} />
-        <Route path="/admin/products" element={<ProductList />} />
         <Route path="/admin/category" element={<CategoryPage />} />
         <Route path="/admin/seller-list" element={<SellerList />} />
         <Route path="/admin/seller-card" element={<SellerCard />} />
-        <Route path="/admin/seller-profile/:id" element={<SellerProfile />} />
-        <Route path="/admin/order-list" element={<OrderList />} />
+        <Route path="/admin/seller-profile/:id" element={<SellerProfile/>} />
         <Route path="/admin/invoice" element={<Invoice />} />
         <Route path="/admin/transactions" element={<Transactions />} />
         <Route path="/admin/seller-accounts" element={<AccountPage type="seller" />} />
         <Route path="/admin/customer-accounts" element={<AccountPage type="customer" />} />
         <Route path="/admin/admin-accounts" element={<AccountPage type="admin" />} />
         <Route path="/admin/reviews" element={<Reviews />} />
+
+
+        <Route path="/seller" element={<Seller />} />
+        <Route path="/seller/products" element={<ProductList />} />
+        <Route path="/seller/orders" element={<OrderList />} />
       </Routes>
-      {!isAdminRoute && <Footer />}
+      {(!isAdminRoute && !isSellerRoute) && <Footer />}
     </div>
   );
 }
