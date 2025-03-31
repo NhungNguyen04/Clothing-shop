@@ -12,37 +12,48 @@ const ShopContextProvider = (props) => {
   const [search, setSearch] = useState("");
   const [showSearch, setShowSearch] = useState(false);
   const [cartItems, setCartItems] = useState(() => {
-    // Load cart data from localStorage on initial render
     const savedCart = localStorage.getItem("cartItems");
     return savedCart ? JSON.parse(savedCart) : {};
   });
 
-  // Save cartItems to localStorage whenever it changes
+  const [cartTotal, setCartTotal] = useState(0);
+
   useEffect(() => {
     localStorage.setItem("cartItems", JSON.stringify(cartItems));
   }, [cartItems]);
 
-  const addToCart = (itemId, productSize) => {
+  const addToCart = (itemId, productSize, price) => {
     if (!productSize) {
       toast.error("Please select a size");
       return;
     }
-
+  
+    if (!price || price <= 0) {
+      toast.error("Invalid price");
+      return;
+    }
+  
     setCartItems((prevCart) => {
       const updatedCart = { ...prevCart };
-
+  
       if (!updatedCart[itemId]) {
-        updatedCart[itemId] = {};
+        updatedCart[itemId] = [];
       }
-
-      updatedCart[itemId][productSize] = (updatedCart[itemId][productSize] || 0) + 1;
-
+  
+      const existingSize = updatedCart[itemId].find(item => item.size === productSize);
+  
+      if (existingSize) {
+        existingSize.quantity += 1;
+      } else {
+        updatedCart[itemId].push({ size: productSize, quantity: 1, price });
+      }
+  
       return updatedCart;
     });
   };
-
-
-
+  
+  
+  
 
   const getCartCount = () => {
     return Object.keys(cartItems).length;
@@ -59,6 +70,8 @@ const ShopContextProvider = (props) => {
     cartItems,
     addToCart,
     getCartCount,
+    cartTotal,
+    setCartTotal,
   };
 
   return <ShopContext.Provider value={value}>{props.children}</ShopContext.Provider>;

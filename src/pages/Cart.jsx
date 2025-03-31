@@ -1,51 +1,86 @@
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { GoTrash } from "react-icons/go";
-import axiosInstance from '../api/axiosInstance';
+import { motion, AnimatePresence } from "framer-motion";
+import axiosInstance from "../api/axiosInstance";
+import { ShopContext } from "../context/ShopContext";
+
 export default function Cart() {
   const navigate = useNavigate();
   const [cart, setCart] = useState([]);
   const shippingFee = 10;
-
+  const {cartTotal, setCartTotal} = useContext(ShopContext)
   useEffect(() => {
     const storedCart = JSON.parse(localStorage.getItem("cartItems")) || {};
     
-    Object.keys(storedCart).forEach(async (productId) => {
-      try {
-        const response = await axiosInstance.get(`/products/${productId}`)
-        const product = response.data.data;
-
-        setCart((prevCart) => [
-          ...prevCart,
-          ...Object.entries(storedCart[productId]).map(([size, quantity]) => ({
-            id: productId,
-            name: product.name,
-            price: product.price,
-            size,
-            quantity,
-            image: product.image[0] || "https://cdn.vectorstock.com/i/500p/46/50/missing-picture-page-for-website-design-or-mobile-vector-27814650.jpg",
-          })),
-        ]);
-      } catch (error) {
-        console.error("Error fetching product:", error);
+    const fetchCartItems = async () => {
+      const cartItems = [];
+      let subtotal = 0;
+  
+      for (const productId of Object.keys(storedCart)) {
+        try {
+          const response = await axiosInstance.get(`/products/${productId}`);
+          const product = response.data.data;
+  
+          const items = Object.entries(storedCart[productId]).map(([index, item]) => {
+            const itemTotal = product.price * item.quantity;
+            subtotal += itemTotal; // Tính tổng giá trị sản phẩm trong giỏ hàng
+            return {
+              id: productId,
+              name: product.name,
+              price: product.price,
+              size: item.size,
+              quantity: item.quantity,
+              image:
+                product.image[0] ||
+                "https://cdn.vectorstock.com/i/500p/46/50/missing-picture-page-for-website-design-or-mobile-vector-27814650.jpg",
+            };
+          });
+  
+          cartItems.push(...items);
+        } catch (error) {
+          console.error("Error fetching product:", error);
+        }
       }
-    });
+  
+      setCart(cartItems);
+      setCartTotal(subtotal);
+    };
+  
+    fetchCartItems();
   }, []);
+  
+
+
+  const updateLocalStorage = (updatedCart) => {
+    const cartData = {};
+    updatedCart.forEach(({ id, size, quantity }) => {
+      if (!cartData[id]) cartData[id] = {};
+      cartData[id][size] = quantity;
+    });
+    localStorage.setItem("cartItems", JSON.stringify(cartData));
+  };
 
   const updateQuantity = (id, size, quantity) => {
-    setCart((prevCart) =>
-      prevCart.map((item) =>
-        item.id === id && item.size === size ? { ...item, quantity } : item
-      )
+    if (quantity < 1) return;
+    const updatedCart = cart.map((item) =>
+      item.id === id && item.size === size ? { ...item, quantity } : item
     );
+    setCart(updatedCart);
+    updateLocalStorage(updatedCart);
   };
 
   const removeItem = (id, size) => {
-    setCart((prevCart) => prevCart.filter((item) => !(item.id === id && item.size === size)));
+    setCart((prevCart) =>
+      prevCart.filter((item) => !(item.id === id && item.size === size))
+    );
+    setTimeout(() => {
+      const updatedCart = cart.filter(
+        (item) => !(item.id === id && item.size === size)
+      );
+      updateLocalStorage(updatedCart);
+    }, 500);
   };
-
-  const subtotal = cart.reduce((acc, item) => acc + item.price * item.quantity, 0);
-  const total = subtotal + shippingFee;
 
   return (
     <div className="max-w-4xl mx-auto p-6 bg-white shadow rounded-lg">
@@ -56,28 +91,38 @@ export default function Cart() {
         <div className="h-[2px] w-[25px] bg-black mb-2 ml-4"></div>
       </div>
       <div className="mt-4">
-        {cart.map((item) => (
-          <div key={`${item.id}-${item.size}`} className="flex items-center justify-between border-b py-4">
-            <img src={item.image} alt={item.name} className="w-16 h-16 object-cover rounded" />
-            <div className="flex-1 ml-4">
-              <p className="text-[14px] text-[#494949]">{item.name}</p>
-              <div className="flex items-center mt-2">
-                <p className="text-[#494949]">${item.price}</p>
-                <p className="text-sm bg-[#FBFBFB] border border-[#DFDFDF] inline-block px-3 py-1 rounded ml-4">{item.size}</p>
+        <AnimatePresence>
+          {cart.map((item) => (
+            <motion.div
+              key={`${item.id}-${item.size}`}
+              initial={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: 50 }}
+              transition={{ duration: 0.5 }}
+              className="flex items-center justify-between border-b py-4"
+            >
+              <img src={item.image} alt={item.name} className="w-16 h-16 object-cover rounded" />
+              <div className="flex-1 ml-4">
+                <p className="text-[14px] text-[#494949]">{item.name}</p>
+                <div className="flex items-center mt-2">
+                  <p className="text-[#494949]">${item.price}</p>
+                  <p className="text-sm bg-[#FBFBFB] border border-[#DFDFDF] inline-block px-3 py-1 rounded ml-4">
+                    {item.size}
+                  </p>
+                </div>
               </div>
-            </div>
-            <input
-              type="number"
-              value={item.quantity}
-              onChange={(e) => updateQuantity(item.id, item.size, parseInt(e.target.value))}
-              className="w-12 border p-1 text-center rounded"
-              min="1"
-            />
-            <div className="ml-4 cursor-pointer">
-              <GoTrash onClick={() => removeItem(item.id, item.size)} />
-            </div>
-          </div>
-        ))}
+              <input
+                type="number"
+                value={item.quantity}
+                onChange={(e) => updateQuantity(item.id, item.size, parseInt(e.target.value))}
+                className="w-12 border p-1 text-center rounded"
+                min="1"
+              />
+              <div className="ml-4 cursor-pointer">
+                <GoTrash onClick={() => removeItem(item.id, item.size)} />
+              </div>
+            </motion.div>
+          ))}
+        </AnimatePresence>
       </div>
       <div className="mt-6 pt-4 w-1/2 ml-auto">
         <div className="flex items-center">
@@ -88,7 +133,7 @@ export default function Cart() {
         </div>
         <div className="flex justify-between text-gray-600 mt-2">
           <span>Subtotal</span>
-          <span>${subtotal.toFixed(2)}</span>
+          <span>${cartTotal.toFixed(2)}</span>
         </div>
         <div className="flex justify-between text-gray-600 mt-2">
           <span>Shipping</span>
@@ -96,7 +141,7 @@ export default function Cart() {
         </div>
         <div className="flex justify-between font-bold text-lg mt-2">
           <span>Total</span>
-          <span>${total.toFixed(2)}</span>
+          <span>${(cartTotal + shippingFee).toFixed(2)}</span>
         </div>
         <button
           className="w-1/2 ml-auto block mt-4 text-[12px] bg-black text-white py-2 rounded hover:bg-gray-800"
