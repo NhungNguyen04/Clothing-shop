@@ -22,35 +22,37 @@ const ShopContextProvider = (props) => {
     localStorage.setItem("cartItems", JSON.stringify(cartItems));
   }, [cartItems]);
 
-  const addToCart = (itemId, productSize, price) => {
-    if (!productSize) {
-      toast.error("Please select a size");
-      return;
+  const addToCart = (itemId, productSize, price, sellerId) => {
+  if (!productSize) {
+    toast.error("Please select a size");
+    return;
+  }
+
+  if (!price || price <= 0) {
+    toast.error("Invalid price");
+    return;
+  }
+
+  setCartItems((prevCart) => {
+    const updatedCart = { ...prevCart };
+
+    // Ensure itemId and sellerId are both defined before proceeding
+    if (!updatedCart[itemId]) {
+      updatedCart[itemId] = [];
     }
-  
-    if (!price || price <= 0) {
-      toast.error("Invalid price");
-      return;
+
+    const existingSize = updatedCart[itemId].find(item => item.size === productSize && item.sellerId === sellerId);
+
+    if (existingSize) {
+      existingSize.quantity += 1;
+    } else {
+      updatedCart[itemId].push({ size: productSize, quantity: 1, price, sellerId });
     }
-  
-    setCartItems((prevCart) => {
-      const updatedCart = { ...prevCart };
-  
-      if (!updatedCart[itemId]) {
-        updatedCart[itemId] = [];
-      }
-  
-      const existingSize = updatedCart[itemId].find(item => item.size === productSize);
-  
-      if (existingSize) {
-        existingSize.quantity += 1;
-      } else {
-        updatedCart[itemId].push({ size: productSize, quantity: 1, price });
-      }
-  
-      return updatedCart;
-    });
-  };
+
+    return updatedCart;
+  });
+};
+
   
   
   

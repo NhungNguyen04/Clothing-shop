@@ -2,12 +2,14 @@ import { useContext, useEffect, useState } from "react";
 import DeliveryInformation from "../components/DeliInformation";
 import { ShopContext } from "../context/ShopContext";
 import axiosInstance from "../api/axiosInstance";
+import useAuth from "../hooks/useAuth";
 
 const CheckOut = () => {
     const [paymentMethod, setPaymentMethod] = useState("razorpay");
     const [cart, setCart] = useState([]);
     const { cartTotal } = useContext(ShopContext);
     const [isLoading, setIsLoading] = useState(false);
+    const user = useAuth()
     const [deliveryInfo, setDeliveryInfo] = useState({
         name: "",
         email: "",
@@ -23,7 +25,8 @@ const CheckOut = () => {
                 productId,
                 size: item.size,
                 quantity: item.quantity,
-                price: item.price
+                price: item.price,
+                sellerId: item.sellerId
             }))
         );
         setCart(transformedCart)
@@ -32,19 +35,29 @@ const CheckOut = () => {
     
 
     const handlePlaceOrder = async () => {
-        setIsLoading(true);
-        const response = await axiosInstance.post('/orders', {
-            customerName: deliveryInfo.name, 
-            address: deliveryInfo.address,
-            phoneNumber: deliveryInfo.phoneNumber,
-            totalPrice: parseFloat(cartTotal), 
-            status: 'PENDING',    
-            orderDetails: cart
-        })
-        console.log(response.data)
-        setTimeout(() => {
-            setIsLoading(false);
-        }, 2000);
+        try {
+            setIsLoading(true);
+            for (let i = 0; i < cart.length; i++) {
+                await axiosInstance.post('/orders', {
+                    customerName: deliveryInfo.name, 
+                    address: deliveryInfo.address,
+                    phoneNumber: deliveryInfo.phoneNumber,
+                    totalPrice: parseFloat(cartTotal), 
+                    userId: user.id,
+                    status: 'PENDING',    
+                    productId: cart[i].productId,
+                    quantity: cart[i].quantity,
+                    price: cart[i].price,
+                    sellerId: cart[i].sellerId,
+                    size: cart[i].size  
+                })
+            }
+            setTimeout(() => {
+                setIsLoading(false);
+            }, 2000);
+        } catch (error) {
+            console.log(error)
+        }
     };
 
     const handleDeliveryChange = (name, value) => {

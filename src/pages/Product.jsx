@@ -47,7 +47,7 @@ const Product = () => {
     }
 
     for (let i = 0; i < quantity; i++) {
-      addToCart(productId, size, productData.price);
+      addToCart(productId, size, productData.price, productData.sellerId);
     }
     setQuantity(1)
     toast.success("Product added to cart!");

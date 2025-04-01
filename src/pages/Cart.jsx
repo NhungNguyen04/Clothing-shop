@@ -22,7 +22,7 @@ export default function Cart() {
           const response = await axiosInstance.get(`/products/${productId}`);
           const product = response.data.data;
   
-          const items = Object.entries(storedCart[productId]).map(([index, item]) => {
+          const items = Object.entries(storedCart[productId]).map(([, item]) => {
             const itemTotal = product.price * item.quantity;
             subtotal += itemTotal; // Tính tổng giá trị sản phẩm trong giỏ hàng
             return {
@@ -48,7 +48,7 @@ export default function Cart() {
     };
   
     fetchCartItems();
-  }, []);
+  }, [setCartTotal]);
   
 
 
