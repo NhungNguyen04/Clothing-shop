@@ -51,6 +51,7 @@ function App() {
         <Route path="/product/:productId" element={<Product />} />
         <Route path="/cart" element={<Cart />} />
         <Route path="/check-out" element={<CheckOut />} />
+        <Route path="/check-out/:productId" element={<CheckOut />} />
         <Route path="/login" element={user ? <Navigate to="/" /> : <Login />} />
         <Route path="/register" element={<Register />} />
         <Route path="/place-order" element={<PlaceOrder />} />
@@ -76,6 +77,8 @@ function App() {
         <Route path="/seller" element={<Seller />} />
         <Route path="/seller/products" element={<ProductList />} />
         <Route path="/seller/orders" element={<OrderList />} />
+        <Route path="/seller/reviews" element={<Reviews />} />
+
       </Routes>
       {(!isAdminRoute && !isSellerRoute) && <Footer />}
     </div>

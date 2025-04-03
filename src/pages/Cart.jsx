@@ -28,6 +28,7 @@ export default function Cart() {
             return {
               id: productId,
               name: product.name,
+              sellerId: product.sellerId,
               price: product.price,
               size: item.size,
               quantity: item.quantity,
@@ -53,10 +54,12 @@ export default function Cart() {
 
 
   const updateLocalStorage = (updatedCart) => {
+    console.log(updatedCart)
     const cartData = {};
-    updatedCart.forEach(({ id, size, quantity }) => {
+    updatedCart.forEach(({ id, size, quantity, price, sellerId }) => {
       if (!cartData[id]) cartData[id] = {};
-      cartData[id][size] = quantity;
+      cartData[id] = {size, quantity, price, sellerId};
+      setCartTotal(price * quantity)
     });
     localStorage.setItem("cartItems", JSON.stringify(cartData));
   };
@@ -78,6 +81,7 @@ export default function Cart() {
       const updatedCart = cart.filter(
         (item) => !(item.id === id && item.size === size)
       );
+      console.log(updatedCart)
       updateLocalStorage(updatedCart);
     }, 500);
   };

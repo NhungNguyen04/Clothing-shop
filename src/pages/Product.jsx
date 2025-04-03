@@ -1,5 +1,5 @@
 import { useEffect, useState, useCallback, useContext } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { Link, useNavigate, useParams } from 'react-router-dom';
 import RelatedProducts from '../components/RelatedProducts';
 import axiosInstance from '../api/axiosInstance';
 import { toast } from 'react-toastify';
@@ -233,9 +233,11 @@ const Product = () => {
             >
               ADD TO CART
             </button>
-            <button className="bg-orange-500 text-white px-8 py-3 text-sm active:bg-orange-700">
-              BUY NOW
-            </button>
+            <Link to={`/check-out/${productId}?size=${size}&quantity=${quantity}`}>
+              <button className="bg-orange-500 text-white px-8 py-3 text-sm active:bg-orange-700">
+                BUY NOW
+              </button>
+            </Link>
           </div>
 
           <hr className="mt-8 sm:w-4/5" />

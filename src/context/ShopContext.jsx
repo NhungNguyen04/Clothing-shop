@@ -23,35 +23,36 @@ const ShopContextProvider = (props) => {
   }, [cartItems]);
 
   const addToCart = (itemId, productSize, price, sellerId) => {
-  if (!productSize) {
-    toast.error("Please select a size");
-    return;
-  }
-
-  if (!price || price <= 0) {
-    toast.error("Invalid price");
-    return;
-  }
-
-  setCartItems((prevCart) => {
-    const updatedCart = { ...prevCart };
-
-    // Ensure itemId and sellerId are both defined before proceeding
-    if (!updatedCart[itemId]) {
-      updatedCart[itemId] = [];
+    if (!productSize) {
+      toast.error("Please select a size");
+      return;
     }
 
-    const existingSize = updatedCart[itemId].find(item => item.size === productSize && item.sellerId === sellerId);
-
-    if (existingSize) {
-      existingSize.quantity += 1;
-    } else {
-      updatedCart[itemId].push({ size: productSize, quantity: 1, price, sellerId });
+    if (!price || price <= 0) {
+      toast.error("Invalid price");
+      return;
     }
 
-    return updatedCart;
-  });
-};
+    setCartItems((prevCart) => {
+      const updatedCart = { ...prevCart };
+
+      if (!updatedCart[itemId]) {
+        updatedCart[itemId] = []; // Ensure it's an array
+      }
+
+      // Check if updatedCart[itemId] is an array before using find
+      const existingSize = Array.isArray(updatedCart[itemId]) ? 
+        updatedCart[itemId].find(item => item.size === productSize && item.sellerId === sellerId) : null;
+
+      if (existingSize) {
+        existingSize.quantity += 1;
+      } else {
+        updatedCart[itemId].push({ size: productSize, quantity: 1, price, sellerId });
+      }
+
+      return updatedCart;
+    });
+  };
 
   
   
