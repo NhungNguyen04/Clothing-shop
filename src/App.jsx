@@ -31,7 +31,7 @@ import Reviews from './pages/Admin/Reviews';
 import useAuth from './hooks/useAuth';
 import Seller from './pages/Seller/Seller';
 import SellerProfile from './pages/Admin/SellerProfile';
-
+import Profile from './pages/Profile';
 function App() {
   const location = useLocation();
   const isAdminRoute = location.pathname.startsWith('/admin');
@@ -45,6 +45,7 @@ function App() {
       {(!isAdminRoute && !isSellerRoute) && <SearchBar />}
       <Routes>
         <Route path="/" element={<Home />} />
+        <Route path="/profile" element={<Profile />} />
         <Route path="/collection" element={<Collection />} />
         <Route path="/about" element={<About />} />
         <Route path="/contact" element={<ContactUs />} />
