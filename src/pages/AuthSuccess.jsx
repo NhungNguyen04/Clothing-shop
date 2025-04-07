@@ -21,16 +21,13 @@ function AuthSuccess() {
         const user = {
           id: payload.sub,
           email: payload.email,
+          image: payload.picture,
+          name: payload.name.replace('undefined', '').trim(),
         };
         localStorage.setItem('user', JSON.stringify(user));
         
-        // Show success message
-        toast.success('Successfully logged in with Google!');
-
-        // Redirect to the home page
-        setTimeout(() => {
-          navigate('/');
-        }, 1000);
+        navigate('/');
+        window.location.reload();
       } catch (error) {
         console.error('Error parsing JWT token', error);
         toast.error('Authentication successful but there was a problem with your session.');

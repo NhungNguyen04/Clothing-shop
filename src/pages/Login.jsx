@@ -26,6 +26,10 @@ const Login = () => {
     }
   };
 
+  const handleGoogleLogin = () => {
+    window.location.href = "http://localhost:3300/auth/google";
+  };
+
   return (
     <div className="flex flex-col items-center mt-6 min-h-screen">
       <h2 className="text-2xl text-[#414141] font-bold mb-6">Login <span className="text-gray-700">—</span></h2>
@@ -54,7 +58,11 @@ const Login = () => {
         <button type="submit" className="w-full bg-black text-white py-3 rounded mb-4" disabled={loading}>
           {loading ? "Signing in..." : "Sign in"}
         </button>
-        <button className="w-full border border-gray-400 py-3 rounded flex items-center justify-center gap-2">
+        <button 
+          type="button"
+          onClick={handleGoogleLogin}
+          className="w-full border border-gray-400 py-3 rounded flex items-center justify-center gap-2 hover:bg-gray-100 transition-colors"
+        >
           <FcGoogle/>
           Login with Google
         </button>

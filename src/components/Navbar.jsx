@@ -33,12 +33,13 @@ const Navbar = () => {
             </Link>
             
             <div className="relative">
-              <img
-                src={user?.avatar || assets.default_avatar}
-                alt="User Avatar"
-                className="w-12 h-12 rounded-full cursor-pointer border border-gray-300"
-                onClick={() => setDropdownOpen(!dropdownOpen)}
-              />
+              <div className="w-12 h-12 rounded-full overflow-hidden cursor-pointer border border-gray-300" onClick={() => setDropdownOpen(!dropdownOpen)}>
+                <img
+                  src={user?.image || "https://imgs.search.brave.com/_iyLNnunOEosdmlE0FgMPuvz-DPiRMSOZgzNPypuGgw/rs:fit:860:0:0:0/g:ce/aHR0cHM6Ly9jZG4x/Lmljb25maW5kZXIu/Y29tL2RhdGEvaWNv/bnMvdXNlci1waWN0/dXJlcy8xMDAvdW5r/bm93bi01MTIucG5n"}
+                  alt="User Avatar"
+                  className="w-full h-full object-cover"
+                />
+              </div>
               {dropdownOpen && (
                 <div className="absolute left-1/2 transform -translate-x-1/2 top-[110%] w-48 bg-white shadow-lg rounded-md py-2 z-50 border border-gray-200">
                   <Link to="/profile" className="block px-4 py-2 text-gray-700 hover:bg-gray-100">My Profile</Link>
