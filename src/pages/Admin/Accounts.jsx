@@ -1,25 +1,55 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { FaPlus, FaUser, FaUsers, FaUserShield } from "react-icons/fa";
 import AdminLayout from "./components/AdminLayout";
-
-const accountsData = {
-  seller: [
-    { id: "S001", name: "John Doe", email: "john@seller.com", joined: "2023-01-15" },
-    { id: "S002", name: "Jane Smith", email: "jane@seller.com", joined: "2022-11-20" }
-  ],
-  customer: [
-    { id: "C001", name: "Alice Brown", email: "alice@customer.com", joined: "2023-02-10" },
-    { id: "C002", name: "Bob White", email: "bob@customer.com", joined: "2022-10-05" }
-  ],
-  admin: [
-    { id: "A001", name: "Super Admin", email: "admin@site.com", joined: "2021-09-30" }
-  ]
-};
+import axiosInstance from "../../api/axiosInstance";
+import Spinner from "../../components/Spinner";
+import { useNavigate } from "react-router-dom";
 
 // eslint-disable-next-line react/prop-types
 const AccountPage = ({ type }) => {
-  const [accounts] = useState(accountsData[type] || []);
-  
+  const [accounts, setAccounts] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    const fetchAccounts = async () => {
+      try {
+        setLoading(true);
+        const response = await axiosInstance.get('/users');
+        const allUsers = response.data.data;
+        let filteredUsers = [];
+        if (type === "seller") {
+          filteredUsers = allUsers.filter(user => user.role === "SELLER");
+        } else if (type === "customer") {
+          filteredUsers = allUsers.filter(user => user.role === "CUSTOMER");
+        } else if (type === "admin") {
+          filteredUsers = allUsers.filter(user => user.role === "ADMIN");
+        }
+        setAccounts(filteredUsers);
+      } catch (err) {
+        console.error("Error fetching accounts:", err);
+        setError("Failed to load accounts.");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchAccounts();
+  }, [type]);
+
+  const handleViewDetails = (accountId) => {
+    navigate(`/admin/user-profile/${accountId}`);
+  };
+
+  if (loading) {
+    return <Spinner />;
+  }
+
+  if (error) {
+    return <div className="text-center text-red-500 mt-10">{error}</div>;
+  }
+
   return (
     <AdminLayout>
       <div className="p-6 bg-gray-100 min-h-screen">
@@ -41,9 +71,9 @@ const AccountPage = ({ type }) => {
               </tr>
             </thead>
             <tbody>
-              {accounts.map((account) => (
+              {accounts.map((account, index) => (
                 <tr key={account.id} className="border-t">
-                  <td className="p-3">{account.id}</td>
+                  <td className="p-3">{index + 1}</td>
                   <td className="p-3 flex items-center gap-2">
                     {type === "seller" && <FaUser className="text-blue-500" />}
                     {type === "customer" && <FaUsers className="text-green-500" />}
@@ -51,9 +81,14 @@ const AccountPage = ({ type }) => {
                     {account.name}
                   </td>
                   <td className="p-3">{account.email}</td>
-                  <td className="p-3">{account.joined}</td>
+                  <td className="p-3">{new Date(account.createdAt).toLocaleDateString()}</td>
                   <td className="p-3 text-center">
-                    <button className="bg-gray-500 text-white px-3 py-1 rounded-md">Details</button>
+                    <button 
+                      onClick={() => handleViewDetails(account.id)}
+                      className="bg-gray-500 text-white px-3 py-1 rounded-md"
+                    >
+                      Details
+                    </button>
                   </td>
                 </tr>
               ))}
