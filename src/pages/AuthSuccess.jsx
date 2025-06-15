@@ -18,13 +18,21 @@ function AuthSuccess() {
       // Parse JWT to get user information
       try {
         const payload = JSON.parse(atob(token.split('.')[1]));
+        console.log('Token payload:', payload); // Debug token payload
+
         const user = {
           id: payload.sub,
           email: payload.email,
           image: payload.picture,
           name: payload.name.replace('undefined', '').trim(),
+          role: payload.role
         };
+        console.log('User object before save:', user); // Debug user object
         localStorage.setItem('user', JSON.stringify(user));
+        
+        // Verify localStorage
+        const savedUser = localStorage.getItem('user');
+        console.log('Saved user in localStorage:', JSON.parse(savedUser)); // Debug saved user
         
         navigate('/');
         window.location.reload();
