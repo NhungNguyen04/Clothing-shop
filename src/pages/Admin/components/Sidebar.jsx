@@ -8,21 +8,9 @@ import useAuth from "../../../hooks/useAuth";
 const menuItems = {
   admin: [
     { name: "Dashboard", icon: <FaHome />, link: "/admin/dashboard" },
-    { name: "Products", icon: <FaBox />, subMenu: [
-        { name: "Product Items", link: "/admin/products" },
-        { name: "Category", link: "/admin/category" }
-      ] },
-    { name: "Orders", icon: <FaShoppingCart />, subMenu: [
-        { name: "Order List", link: "/admin/order-list" },
-        { name: "Invoice", link: "/admin/invoice" }
-      ] },
-    { name: "Sellers", icon: <FaUsers />, subMenu: [
-        { name: "Seller List", link: "/admin/seller-list" },
-        { name: "Seller Card", link: "/admin/seller-card" }
-      ] },
+    { name: "Seller", icon: <FaUsers />, link: "/admin/seller-list" },
     { name: "Transactions", icon: <FaDollarSign />, link: "/admin/transactions" },
     { name: "Account", icon: <FaUser />, subMenu: [
-        { name: "Seller Account", link: "/admin/seller-accounts" },
         { name: "Customer Account", link: "/admin/customer-accounts" },
         { name: "Admin Account", link: "/admin/admin-accounts" }
       ] },
@@ -43,8 +31,10 @@ export default function Sidebar() {
   const [isOpen, setIsOpen] = useState(true);
   const [openMenus, setOpenMenus] = useState({});
   const location = useLocation();
-  const user = useAuth();
+  const {user} = useAuth();
   const role = user?.role;
+
+  console.log("Sidebar role:", role);
 
   useEffect(() => {
     const newOpenMenus = {};

@@ -40,6 +40,7 @@ export default function ProductTable({ data, setIsOpen, setInitialData }) {
       <table className="min-w-full bg-white border border-gray-200 rounded-lg">
         <thead>
           <tr className="bg-gray-100">
+            <th className="p-3 text-left">#</th>
             <th className="p-3 text-left">Product</th>
             <th className="p-3 text-left">Price</th>
             <th className="p-3 text-left">Status</th>
@@ -49,7 +50,7 @@ export default function ProductTable({ data, setIsOpen, setInitialData }) {
         </thead>
         <tbody>
           <AnimatePresence>
-            {currentProducts.length > 0 && currentProducts.map((product) => (
+            {currentProducts.length > 0 && currentProducts.map((product, index) => (
               <motion.tr
                 key={product.id}
                 className="border-b hover:bg-gray-50"
@@ -58,13 +59,16 @@ export default function ProductTable({ data, setIsOpen, setInitialData }) {
                 exit={{ opacity: 0, y: -10 }}
                 transition={{ duration: 0.3 }}
               >
-                <td className="p-3 flex items-center">
+                <td className="py-3 px-6 text-left whitespace-nowrap">{(currentPage - 1) * ITEMS_PER_PAGE + index + 1}</td>
+                <td className="p-3 flex items-center w-[250px]">
                   <img
                     src={product.image[0]}
                     alt={product.name}
                     className="w-[50px] h-[50px] rounded mr-3"
                   />
-                  {product.name}
+                  <span className="text-sm font-medium overflow-hidden text-ellipsis whitespace-nowrap" style={{ maxWidth: '180px' }}>
+                    {product.name}
+                  </span>
                 </td>
                 <td className="p-3">{product.price}</td>
                 <td className="p-3">

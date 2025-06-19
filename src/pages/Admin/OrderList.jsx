@@ -4,6 +4,7 @@ import AdminLayout from "./components/AdminLayout";
 import axiosInstance from "../../api/axiosInstance";
 import useAuth from "../../hooks/useAuth";
 import { motion } from "framer-motion";
+import Spinner from "../../components/Spinner";
 
 const statusColors = {
   "PENDING": "bg-orange-100 text-orange-700",
@@ -20,26 +21,34 @@ export default function OrderList() {
   const [showModal, setShowModal] = useState(false);
   const [selectedOrder, setSelectedOrder] = useState(null);
   const [dropdownOpen, setDropdownOpen] = useState(null);
-  const user = useAuth();
+  const { user } = useAuth();
   const [orders, setOrders] = useState([]);
-  const [ordersSummary, setOrdersSummary] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [currentPage, setCurrentPage] = useState(1);
+  const pageSize = 6;
+  const totalPages = Math.ceil(orders.length / pageSize);
+  const paginatedOrders = orders.slice((currentPage - 1) * pageSize, currentPage * pageSize);
+  const [statusLoadingId, setStatusLoadingId] = useState(null);
 
+  const rowVariants = {
+    hidden: { opacity: 0, y: 10 },
+    visible: (index) => ({
+      opacity: 1,
+      y: 0,
+      transition: { delay: index * 0.1 },
+    }),
+  };
 
-    const rowVariants = {
-      hidden: { opacity: 0, y: 10 },
-      visible: (index) => ({
-        opacity: 1,
-        y: 0,
-        transition: { delay: index * 0.1 },
-      }),
-    };
   const getList = useCallback(async () => {
     try {
+      setLoading(true);
       const response = await axiosInstance.get(`/orders/seller/${user?.idSeller}`);
       const ordersData = response.data.data;
       setOrders(ordersData);
     } catch (error) {
       console.error("Error fetching orders:", error);
+    } finally {
+      setLoading(false);
     }
   }, [user?.idSeller]);
 
@@ -48,41 +57,6 @@ export default function OrderList() {
       getList();
     }
   }, [user?.idSeller, getList]);
-
-  const groupOrdersByDateAndCustomer = useCallback(() => {
-    const grouped = {};
-
-    orders.forEach(order => {
-      const orderDate = new Date(order.orderDate).toLocaleDateString("en-GB");
-      const customerName = order.customerName;
-      order.product.size = order.size
-      order.product.quantity = order.quantity;
-
-      const groupKey = `${orderDate}-${customerName}`;
-
-      if (!grouped[groupKey]) {
-        grouped[groupKey] = {
-          name: customerName,
-          email: order.user.email,
-          total: 0,
-          status: order.status,
-          date: orderDate,
-          orderId: order.id,
-          products: [],
-        };
-      }
-
-      grouped[groupKey].total += order.price;
-      grouped[groupKey].products.push(order.product);
-    });
-
-    return Object.values(grouped);
-  }, [orders]);
-
-  useEffect(() => {
-    const summary = groupOrdersByDateAndCustomer();
-    setOrdersSummary(summary);
-  }, [orders, groupOrdersByDateAndCustomer]);
 
   const openDetailModal = (order) => {
     setSelectedOrder(order);
@@ -96,19 +70,23 @@ export default function OrderList() {
 
   const handleStatusChange = async (newStatus, orderId) => {
     try {
-      await axiosInstance.patch(`/orders/${orderId}`, { status: newStatus });
-
-      setOrdersSummary(prevState =>
-        prevState.map(order => 
-          order.orderId === orderId 
-            ? { ...order, status: newStatus } 
+      setStatusLoadingId(orderId);
+      await axiosInstance.patch(`/orders/${orderId}/status`, { status: newStatus });
+      setOrders(prevState =>
+        prevState.map(order =>
+          order.id === orderId
+            ? { ...order, status: newStatus }
             : order
         )
       );
     } catch (error) {
       console.error("Error updating status:", error);
+    } finally {
+      setStatusLoadingId(null);
     }
   };
+
+  if (loading) return <Spinner />;
 
   return (
     <AdminLayout>
@@ -161,9 +139,9 @@ export default function OrderList() {
               </tr>
             </thead>
             <tbody>
-              {ordersSummary.slice(0, showCount).map((order, index) => (
+              {paginatedOrders.map((order, index) => (
                 <motion.tr
-                  key={index}
+                  key={order.id}
                   className="border-t"
                   variants={rowVariants}
                   initial="hidden"
@@ -171,14 +149,15 @@ export default function OrderList() {
                   custom={index}
                 >
                   <td className="p-3">{index + 1}</td>
-                  <td className="p-3">{order.name}</td>
-                  <td className="p-3">{order.email}</td>
-                  <td className="p-3">${order.total.toFixed(2)}</td>
+                  <td className="p-3">{order.user?.name || order.customerName || "Unknown"}</td>
+                  <td className="p-3">{order.user?.email || ""}</td>
+                  <td className="p-3">${order.orderItems?.reduce((sum, item) => sum + (item.totalPrice || 0), 0).toFixed(2)}</td>
                   <td className="p-3">
                     <select
                       className={`px-2 py-1 text-sm font-semibold rounded-full ${statusColors[order.status]}`}
                       value={order.status}
-                      onChange={(e) => handleStatusChange(e.target.value, order.orderId)}
+                      onChange={(e) => handleStatusChange(e.target.value, order.id)}
+                      disabled={statusLoadingId === order.id}
                     >
                       {statusList.map(status => (
                         <option key={status} value={status}>
@@ -186,18 +165,19 @@ export default function OrderList() {
                         </option>
                       ))}
                     </select>
+                    {statusLoadingId === order.id && <Spinner size={18} className="inline ml-2 align-middle" />}
                   </td>
-                  <td className="p-3">{order.date}</td>
+                  <td className="p-3">{new Date(order.orderDate).toLocaleDateString("en-GB")}</td>
                   <td className="p-3 text-center">
                     <button
                       className="p-2 rounded-full hover:bg-gray-200 relative z-10"
                       onClick={() =>
-                        setDropdownOpen(dropdownOpen === order.orderId ? null : order.orderId)
+                        setDropdownOpen(dropdownOpen === order.id ? null : order.id)
                       }
                     >
                       <FaEllipsisV />
                     </button>
-                    {dropdownOpen === order.orderId && (
+                    {dropdownOpen === order.id && (
                       <div className="absolute right-5 bg-white border border-gray-200 shadow-md rounded-lg w-32 z-20">
                         <button onClick={() => openDetailModal(order)} className="flex items-center px-4 py-2 hover:bg-gray-100 w-full text-left">
                           <FaEdit className="mr-2 text-blue-500" /> Detail
@@ -211,8 +191,34 @@ export default function OrderList() {
                 </motion.tr>
               ))}
             </tbody>
-
           </table>
+        </div>
+
+        {/* Pagination */}
+        <div className="flex justify-center items-center gap-2 mt-4">
+          <button
+            className="px-3 py-1 rounded bg-gray-200 hover:bg-gray-300 disabled:opacity-50"
+            onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+            disabled={currentPage === 1}
+          >
+            &lt;
+          </button>
+          {Array.from({ length: totalPages }, (_, i) => (
+            <button
+              key={i}
+              className={`px-3 py-1 rounded ${currentPage === i + 1 ? 'bg-green-600 text-white' : 'bg-gray-200 hover:bg-gray-300'}`}
+              onClick={() => setCurrentPage(i + 1)}
+            >
+              {i + 1}
+            </button>
+          ))}
+          <button
+            className="px-3 py-1 rounded bg-gray-200 hover:bg-gray-300 disabled:opacity-50"
+            onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+            disabled={currentPage === totalPages}
+          >
+            &gt;
+          </button>
         </div>
       </div>
 
@@ -220,9 +226,7 @@ export default function OrderList() {
         <div className="fixed inset-0 flex items-center justify-center z-50 bg-black bg-opacity-50">
           <div className="bg-white p-6 rounded-lg w-3/4 max-w-4xl">
             <h2 className="text-2xl font-semibold mb-4 text-center">Order Details</h2>
-
             <h3 className="text-xl mb-4">Products</h3>
-
             <table className="w-full table-auto border-collapse">
               <thead>
                 <tr className="bg-gray-100 text-center">
@@ -235,21 +239,24 @@ export default function OrderList() {
                 </tr>
               </thead>
               <tbody>
-                {selectedOrder.products.map((product, index) => (
-                  <tr key={index} className="border-t text-center">
-                    <td className="py-2 flex justify-center">
-                      <img src={product.image} alt={product.name} className="w-12 h-12 object-cover rounded-md" />
-                    </td>
-                    <td className="py-2">{product.name}</td>
-                    <td className="py-2">{product.size}</td>
-                    <td className="py-2">${product.price.toFixed(2)}</td>
-                    <td className="py-2">{product.quantity}</td>
-                    <td className="py-2">${(product.price * product.quantity).toFixed(2)}</td>
-                  </tr>
-                ))}
+                {selectedOrder.orderItems.map((item, index) => {
+                  const product = item.sizeStock?.product || {};
+                  const image = Array.isArray(product.image) ? product.image[0] : product.image;
+                  return (
+                    <tr key={index} className="border-t text-center">
+                      <td className="py-2 flex justify-center">
+                        <img src={image} alt={product.name} className="w-12 h-12 object-cover rounded-md" />
+                      </td>
+                      <td className="py-2">{product.name}</td>
+                      <td className="py-2">{item.sizeStock?.size}</td>
+                      <td className="py-2">${product.price?.toFixed(2) ?? '0.00'}</td>
+                      <td className="py-2">{item.quantity}</td>
+                      <td className="py-2">${(product.price * item.quantity).toFixed(2)}</td>
+                    </tr>
+                  );
+                })}
               </tbody>
             </table>
-
             <div className="mt-4 flex justify-end">
               <button className="bg-gray-600 text-white px-4 py-2 rounded-md" onClick={closeModal}>Close</button>
             </div>

@@ -1,7 +1,9 @@
 import PropTypes from "prop-types";
-import { useForm, useWatch  } from "react-hook-form";
+import { useForm, useWatch } from "react-hook-form";
 import { useState, useEffect } from "react";
 import { FaCamera, FaImage } from "react-icons/fa";
+import { toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 const categories = {
   men: ["topwear", "bottomwear", "winterwear"],
@@ -26,12 +28,14 @@ const ProductForm = ({ isOpen, setIsOpen, onSubmit, initialData }) => {
     const images = initialData?.image?.slice(1, 5) ?? [];
     return images.concat(Array(4 - images.length).fill(null));
   });
+
   const [sizeStock, setSizeStock] = useState(() => {
     return initialData.stockSize?.reduce((acc, item) => {
       acc[item.size] = item.quantity;
       return acc;
     }, {}) || {};
   });
+
   const selectedSizes = useWatch({
     control,
     name: "sizes",
@@ -47,6 +51,18 @@ const ProductForm = ({ isOpen, setIsOpen, onSubmit, initialData }) => {
       setValue("description", initialData.description || "");
       setValue("category", initialData.category || "");
       setValue("subCategory", initialData.subCategory || "");
+      
+      // Initialize react-hook-form values for image files if initialData has them
+      // This is crucial for pre-filling images in edit mode
+      if (initialData.image && initialData.image[0]) {
+        // You might need to fetch the actual File objects if editing, or handle URLs
+        // For simplicity, we'll assume only new files are uploaded for now
+        // If initialData.image[0] is a URL, it's not a File object.
+        // If you want to allow changing images, you'd need to re-select files.
+        // For now, we only use initialData.image for preview purposes.
+        // When editing, if a new file is NOT selected, mainImage and subImages will be their original URLs.
+        // If new files are selected, they will be File objects.
+      }
     }
   }, [initialData, setValue]);
 
@@ -77,26 +93,44 @@ const ProductForm = ({ isOpen, setIsOpen, onSubmit, initialData }) => {
   const handleMainImageUpload = (event) => {
     const file = event.target.files[0];
     if (file) {
+      // Check file type
+      if (!file.type.match(/^image\/(png|jpeg|jpg)$/)) {
+        toast.error('Please upload a PNG, JPEG, or JPG image');
+        return;
+      }
       const reader = new FileReader();
       reader.onloadend = () => {
         setMainImage(reader.result);
-        setValue("mainImage", file);
+        setValue("mainImage", file); // Set the actual File object into form state
       };
       reader.readAsDataURL(file);
+    } else {
+      setMainImage(null);
+      setValue("mainImage", null);
     }
   };
 
   const handleSubImageUpload = (event, index) => {
     const file = event.target.files[0];
     if (file) {
+      // Check file type
+      if (!file.type.match(/^image\/(png|jpeg|jpg)$/)) {
+        toast.error('Please upload a PNG, JPEG, or JPG image');
+        return;
+      }
       const reader = new FileReader();
       reader.onloadend = () => {
         const newSubImages = [...subImages];
         newSubImages[index] = reader.result;
         setSubImages(newSubImages);
-        setValue(`subImages[${index}]`, file);
+        setValue(`subImages[${index}]`, file); // Set the actual File object into form state
       };
       reader.readAsDataURL(file);
+    } else {
+      const newSubImages = [...subImages];
+      newSubImages[index] = null;
+      setSubImages(newSubImages);
+      setValue(`subImages[${index}]`, null);
     }
   };
 
@@ -105,10 +139,19 @@ const ProductForm = ({ isOpen, setIsOpen, onSubmit, initialData }) => {
   };
 
   const onSubmitHandler = (data) => {
+    // mainImage and subImages should already be File objects (or null) from setValue
+    // No need for data.mainImage[0] or Array.from(data.subImages) here if setValue is used correctly
     onSubmit({ ...data, sizeStock });
     setIsOpen(false);
   };
 
+  // Cleanup object URLs when component unmounts or image changes
+  useEffect(() => {
+    return () => {
+      // No direct preview states to revoke, as previews are now managed via component states
+      // However, if you load initialData images as blob URLs, you'd need to revoke them here
+    };
+  }, []); // Depend on component states, not watched values
 
   if (!isOpen) return null;
 
@@ -119,7 +162,12 @@ const ProductForm = ({ isOpen, setIsOpen, onSubmit, initialData }) => {
         <form className="space-y-4" onSubmit={handleSubmit(onSubmitHandler)}>
           <div className="flex justify-center">
             <label className="cursor-pointer relative">
-              <input type="file" accept="image/*" className="hidden" onChange={handleMainImageUpload} />
+              <input 
+                type="file" 
+                accept="image/png,image/jpeg,image/jpg" 
+                className="hidden" 
+                onChange={handleMainImageUpload}
+              />
               {mainImage ? (
                 <img src={mainImage} alt="Main" className="w-48 h-48 object-cover rounded-lg border" />
               ) : (
@@ -208,7 +256,12 @@ const ProductForm = ({ isOpen, setIsOpen, onSubmit, initialData }) => {
           <div className="flex justify-between mt-4">
             {subImages.map((subImage, index) => (
               <label key={index} className="cursor-pointer">
-                <input type="file" accept="image/*" className="hidden" onChange={(event) => handleSubImageUpload(event, index)} />
+                <input 
+                  type="file" 
+                  accept="image/png,image/jpeg,image/jpg" 
+                  className="hidden" 
+                  onChange={(event) => handleSubImageUpload(event, index)}
+                />
                 {subImage ? (
                   <img src={subImage} alt={`Sub ${index}`} className="w-24 h-24 object-cover rounded-lg border" />
                 ) : (
@@ -220,9 +273,20 @@ const ProductForm = ({ isOpen, setIsOpen, onSubmit, initialData }) => {
             ))}
           </div>
 
-          <div className="flex justify-end space-x-2 mt-4">
-            <button type="button" className="px-4 py-2 bg-gray-300 rounded" onClick={() => setIsOpen(false)}>Cancel</button>
-            <button type="submit" className="px-4 py-2 bg-teal-700 text-white rounded">Save</button>
+          <div className="flex justify-end space-x-4 mt-6">
+            <button
+              type="button"
+              onClick={() => setIsOpen(false)}
+              className="px-4 py-2 border rounded-md text-gray-700 hover:bg-gray-100"
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              className="px-4 py-2 bg-green-700 text-white rounded-md hover:bg-green-800"
+            >
+              Save Product
+            </button>
           </div>
         </form>
       </div>
@@ -234,7 +298,7 @@ ProductForm.propTypes = {
   isOpen: PropTypes.bool.isRequired,
   setIsOpen: PropTypes.func.isRequired,
   onSubmit: PropTypes.func.isRequired,
-  initialData: PropTypes.object.isRequired,
+  initialData: PropTypes.object,
 };
 
 export default ProductForm;

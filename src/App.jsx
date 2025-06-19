@@ -21,7 +21,6 @@ import AuthError from './pages/AuthError';
 import Dashboard from './pages/Admin/Dashboard';
 import ProductList from './pages/Admin/Products';
 import CategoryPage from './pages/Admin/Category';
-import SellerCard from './pages/Admin/Sellers';
 import SellerList from './pages/Admin/components/SellerList';
 import OrderList from './pages/Admin/OrderList';
 import Invoice from './pages/Admin/Invoice';
@@ -32,11 +31,21 @@ import useAuth from './hooks/useAuth';
 import Seller from './pages/Seller/Seller';
 import SellerProfile from './pages/Admin/SellerProfile';
 import Profile from './pages/Profile';
+import SellerDashboard from './pages/Seller/SellerDashboard';
+import TrackOrder from './pages/TrackOrder';
+import SellerTransactions from './pages/Seller/Transactions';
+import OrderSuccess from './pages/OrderSuccess';
+import GeminiChatbot from './components/GeminiChatbot';
+import AdminSettings from "./pages/Admin/Settings";
+import SellerSettings from "./pages/Seller/Settings";
+
 function App() {
   const location = useLocation();
   const isAdminRoute = location.pathname.startsWith('/admin');
   const isSellerRoute = location.pathname.startsWith('/seller');
-  const user = useAuth()
+  const {user} = useAuth()
+
+  console.log("User state in App.jsx:", user);
 
   return (
     <div className={isAdminRoute || isSellerRoute ? '' : 'px-4 sm:px-[5vw] md:px-[7vw] lg:px-[9vw]'}>
@@ -51,21 +60,21 @@ function App() {
         <Route path="/contact" element={<ContactUs />} />
         <Route path="/product/:productId" element={<Product />} />
         <Route path="/cart" element={<Cart />} />
-        <Route path="/check-out" element={<CheckOut />} />
-        <Route path="/check-out/:productId" element={<CheckOut />} />
+        <Route path="/check-out/:cartId" element={<CheckOut />} />
         <Route path="/login" element={user ? <Navigate to="/" /> : <Login />} />
         <Route path="/register" element={<Register />} />
         <Route path="/place-order" element={<PlaceOrder />} />
         <Route path="/orders" element={<Orders />} />
+        <Route path="/orders/:orderId" element={<TrackOrder />} />
         <Route path="/try-on/:productId" element={<TryOn />} />
         <Route path="/auth-success" element={<AuthSuccess />} />
         <Route path="/auth-error" element={<AuthError />} />
+        <Route path="/order-success" element={<OrderSuccess />} />
 
         {/* Admin Routes */}
         <Route path="/admin/dashboard" element={<Dashboard />} />
         <Route path="/admin/category" element={<CategoryPage />} />
         <Route path="/admin/seller-list" element={<SellerList />} />
-        <Route path="/admin/seller-card" element={<SellerCard />} />
         <Route path="/admin/seller-profile/:id" element={<SellerProfile/>} />
         <Route path="/admin/invoice" element={<Invoice />} />
         <Route path="/admin/transactions" element={<Transactions />} />
@@ -73,15 +82,19 @@ function App() {
         <Route path="/admin/customer-accounts" element={<AccountPage type="customer" />} />
         <Route path="/admin/admin-accounts" element={<AccountPage type="admin" />} />
         <Route path="/admin/reviews" element={<Reviews />} />
-
+        <Route path="/admin/settings" element={<AdminSettings />} />
 
         <Route path="/seller" element={<Seller />} />
         <Route path="/seller/products" element={<ProductList />} />
         <Route path="/seller/orders" element={<OrderList />} />
         <Route path="/seller/reviews" element={<Reviews />} />
+        <Route path="/seller/dashboard" element={<SellerDashboard />} />
+        <Route path="/seller/transactions" element={<SellerTransactions />} />
+        <Route path="/seller/settings" element={<SellerSettings />} />
 
       </Routes>
       {(!isAdminRoute && !isSellerRoute) && <Footer />}
+      {(!isAdminRoute && !isSellerRoute) && <GeminiChatbot />}
     </div>
   );
 }

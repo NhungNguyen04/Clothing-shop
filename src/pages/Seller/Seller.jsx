@@ -3,25 +3,23 @@ import { toast } from "react-toastify";
 import { FaHourglassHalf, FaStore } from "react-icons/fa";
 import { ImSpinner8 } from "react-icons/im";
 import axiosInstance from "../../api/axiosInstance";
-import OTPInput from "../../components/OTPInput";
 import useAuth from "../../hooks/useAuth";
 import Sidebar from "../Admin/components/Sidebar";
 import Navbar from "../../components/Navbar"; 
 
 const Seller = () => {
-  const user = useAuth();
+  const {user} = useAuth();
   const [seller, setSeller] = useState(null);
   const [loading, setLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [formData, setFormData] = useState({
     email: "",
     address: "",
-    phone: "",
+    phoneNumber: "",
     managerName: "",
     postalCode: "",
     status: "PENDING",
   });
-  const [showOTP, setShowOTP] = useState(false);
 
   const fetchSellerInfo = useCallback(async () => {
     try {
@@ -40,6 +38,16 @@ const Seller = () => {
     }
   }, [user, fetchSellerInfo]);
 
+  useEffect(() => {
+    if (seller?.status === "APPROVED") {
+      const userData = JSON.parse(localStorage.getItem("user"));
+      if (userData && userData.role !== "SELLER") {
+        userData.role = "SELLER";
+        localStorage.setItem("user", JSON.stringify(userData));
+      }
+    }
+  }, [seller]);
+
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
@@ -48,29 +56,26 @@ const Seller = () => {
     e.preventDefault();
     setIsSubmitting(true);
     try {
-      const response = await axiosInstance.post("/sellers", {
-        ...formData,
+      const payload = {
         userId: user?.id,
-      });
+        email: formData.email,
+        addressInfo: {
+          address: formData.address,
+          phoneNumber: formData.phoneNumber,
+          postalCode: formData.postalCode,
+        },
+        managerName: formData.managerName,
+        status: "PENDING",
+      };
+
+      const response = await axiosInstance.post("/sellers", payload);
       console.log("Đăng ký thành công:", response.data);
-      setShowOTP(true);
+      toast.success("Yêu cầu của bạn đã gửi thành công, vui lòng chờ quản trị viên duyệt.");
     } catch (error) {
       console.error("Lỗi đăng ký:", error);
       toast.error("Có lỗi xảy ra, vui lòng thử lại!");
     } finally {
       setIsSubmitting(false);
-    }
-  };
-
-  const handleConfirmOTP = async () => {
-    try {
-      toast.success(
-        "Yêu cầu của bạn đã gửi thành công, vui lòng chờ quản trị viên duyệt."
-      );
-      setShowOTP(false);
-    } catch (error) {
-      console.error("Lỗi xác thực OTP:", error);
-      toast.error("OTP không hợp lệ, vui lòng thử lại!");
     }
   };
 
@@ -128,9 +133,9 @@ const Seller = () => {
             />
             <input
               type="text"
-              name="phone"
+              name="phoneNumber"
               placeholder="Số điện thoại"
-              value={formData.phone}
+              value={formData.phoneNumber}
               onChange={handleChange}
               className="border p-2 rounded-md"
               required
@@ -165,9 +170,6 @@ const Seller = () => {
               )}
             </button>
           </form>
-          {showOTP && (
-            <OTPInput onConfirm={handleConfirmOTP} onClose={() => setShowOTP(false)} />
-          )}
         </div>
       </div>
     );
@@ -175,17 +177,19 @@ const Seller = () => {
 
   // ✅ Nếu seller.status === "APPROVED" -> Render trang quản lý bán hàng
   return (
-    <div className="flex w-screen h-screen">
-      <Sidebar />
-      <main className="flex-1 flex items-center justify-center bg-gray-100">
-        <div className="text-center">
-          <FaStore className="text-6xl text-gray-700 mx-auto mb-4" />
-          <h1 className="text-4xl font-bold text-gray-800">Trang quản lý bán hàng</h1>
-          <p className="text-lg text-gray-600 mt-2">
-            Quản lý sản phẩm, đơn hàng và nhiều hơn nữa!
-          </p>
-        </div>
-      </main>
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100">
+      <div className="flex w-screen h-screen">
+        <Sidebar />
+        <main className="flex-1 flex items-center justify-center bg-gray-100">
+          <div className="text-center">
+            <FaStore className="text-6xl text-gray-700 mx-auto mb-4" />
+            <h1 className="text-4xl font-bold text-gray-800">Trang quản lý bán hàng</h1>
+            <p className="text-lg text-gray-600 mt-2">
+              Quản lý sản phẩm, đơn hàng và nhiều hơn nữa!
+            </p>
+          </div>
+        </main>
+      </div>
     </div>
   );
 };

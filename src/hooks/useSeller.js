@@ -6,7 +6,7 @@ const useSeller = () => {
   const [seller, setSeller] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
-  const user = useAuth();
+  const {user} = useAuth();
 
   useEffect(() => {
     const fetchSeller = async () => {

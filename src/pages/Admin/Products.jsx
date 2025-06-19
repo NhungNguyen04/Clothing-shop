@@ -6,6 +6,7 @@ import axiosInstance from "../../api/axiosInstance";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import useSeller from "../../hooks/useSeller";
+import Spinner from "../../components/Spinner";
 
 
 export default function ProductList() {
@@ -15,7 +16,7 @@ export default function ProductList() {
     const [error, setError] = useState("");
     const [isAdding, setIsAdding] = useState(false);
     const [initialData, setInitialData] = useState({})
-    const {seller} = useSeller()
+    const {seller, loading: sellerLoading, error: sellerError} = useSeller()
 
 
     const uploadImage = async (file) => {
@@ -54,7 +55,9 @@ export default function ProductList() {
     const onSubmit = async (data) => {
         setIsAdding(true);
         try {
-            console.log(data)
+            console.log("Form Data:", data);
+            console.log("Main Image Data:", data.mainImage);
+            console.log("Sub Images Data:", data.subImages);
             delete data.sizes
             const formattedStockSize = Object.entries(data.sizeStock).map(([size, quantity]) => ({
                 size,
@@ -65,11 +68,13 @@ export default function ProductList() {
             const mainImageUrl = initialData?.image?.length > 0 ? initialData?.image[0] : await uploadImage(data.mainImage);
             const subImagesUrls = initialData?.image?.length > 0 ? initialData?.image?.slice(1,5) :  await uploadMultipleImages(data.subImages);
 
+            const combinedImages = [mainImageUrl, ...subImagesUrls].filter(Boolean);
+
             const newProduct = {
                 ...data,
                 stockSize: formattedStockSize,
                 price: parseFloat(data.price),
-                image: [mainImageUrl, ...subImagesUrls],
+                image: combinedImages.length > 0 ? combinedImages : ["https://via.placeholder.com/150"],
                 sellerId: seller?.id
             };
             console.log(newProduct)
@@ -94,27 +99,84 @@ export default function ProductList() {
         }
     };
 
+    const handleExport = async () => {
+        try {
+            const response = await axiosInstance.get('/products/export', {
+                responseType: 'blob',
+            });
+            const url = window.URL.createObjectURL(new Blob([response.data]));
+            const link = document.createElement('a');
+            link.href = url;
+            link.setAttribute('download', 'products.xlsx'); // or products.csv
+            document.body.appendChild(link);
+            link.click();
+            link.parentNode.removeChild(link);
+            toast.success("Sản phẩm đã được xuất ra file Excel!", { position: "top-right" });
+        } catch (error) {
+            console.error("Error exporting products:", error);
+            toast.error("Lỗi khi xuất sản phẩm ra file Excel ❌", { position: "top-right" });
+        }
+    };
+
+    const handleImport = async (event) => {
+        const file = event.target.files[0];
+        if (!file) return;
+
+        const formData = new FormData();
+        formData.append('file', file);
+
+        try {
+            const response = await axiosInstance.post('/products/import', formData, {
+                headers: {
+                    'Content-Type': 'multipart/form-data',
+                },
+            });
+            if (response.data.success) {
+                toast.success("Sản phẩm đã được nhập từ file Excel!", { position: "top-right" });
+                // You might want to re-fetch products after a successful import
+                // to update the table with new data.
+                // fetchProducts(); // Uncomment this if you have a way to trigger fetchProducts from here.
+                // For now, let's just log and rely on manual refresh or next page load.
+            } else {
+                toast.error("Lỗi khi nhập sản phẩm từ file Excel ❌", { position: "top-right" });
+            }
+        } catch (error) {
+            console.error("Error importing products:", error);
+            toast.error("Lỗi khi nhập sản phẩm từ file Excel ❌", { position: "top-right" });
+        } finally {
+            // Clear the input value so the same file can be selected again if needed
+            event.target.value = null;
+        }
+    };
+
     useEffect(() => {
         const fetchProducts = async () => {
             try {
                 if(seller?.id) {
-                    console.log(seller?.id)
+                    console.log('Fetching products for seller:', seller?.id);
                     const response = await axiosInstance.get(`/products/seller/${seller?.id}`);
                     setProducts(response.data.data);
+                    console.log('Products fetched:', response.data.data);
+                } else if (!sellerLoading && !seller?.id) {
+                    console.log("No seller ID available after seller hook loaded.");
+                    setError("No seller information found.");
                 }
             } catch (err) {
                 console.error("Error fetching products:", err);
                 setError("Failed to load products. Please try again.");
             } finally {
                 setLoading(false);
+                console.log('ProductList loading set to false.');
             }
         };
 
-        fetchProducts();
-    }, [seller?.id]);
+        if (!sellerLoading) {
+            fetchProducts();
+        }
+    }, [seller?.id, sellerLoading]);
 
-    if (loading) return <p className="text-center">Loading...</p>;
-    if (error) return <p className="text-center text-red-500">{error}</p>;
+    if (loading || sellerLoading) return <Spinner />;
+    if (error || sellerError) return <p className="text-center text-red-500">{error || sellerError}</p>;
 
     return (
         <AdminLayout>
@@ -126,8 +188,20 @@ export default function ProductList() {
                         <p className="text-gray-500">Manage your products easily.</p>
                     </div>
                     <div className="flex space-x-2">
-                        <button className="border px-4 py-2 rounded text-gray-700">Export</button>
-                        <button className="border px-4 py-2 rounded text-gray-700">Import</button>
+                        <button className="border px-4 py-2 rounded text-gray-700" onClick={handleExport}>Export</button>
+                        <input
+                            type="file"
+                            accept=".xlsx, .xls, .csv"
+                            className="hidden"
+                            id="import-file-input"
+                            onChange={handleImport}
+                        />
+                        <button
+                            className="border px-4 py-2 rounded text-gray-700"
+                            onClick={() => document.getElementById('import-file-input').click()}
+                        >
+                            Import
+                        </button>
                         <button
                             className="bg-teal-700 text-white px-4 py-2 rounded"
                             onClick={() => {setIsOpen(true); setInitialData({})}}
@@ -142,7 +216,7 @@ export default function ProductList() {
                 
                 {isAdding && (
                     <div className="flex justify-center mt-4">
-                        <div className="w-10 h-10 border-4 border-blue-500 border-dotted rounded-full animate-spin"></div>
+                        <Spinner />
                     </div>
                 )}
 

@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { FaPlus, FaUser, FaUsers, FaUserShield } from "react-icons/fa";
+import { FaPlus, FaUser, FaUsers, FaUserShield, FaChevronLeft, FaChevronRight } from "react-icons/fa";
 import AdminLayout from "./components/AdminLayout";
 import axiosInstance from "../../api/axiosInstance";
 import Spinner from "../../components/Spinner";
@@ -11,6 +11,9 @@ const AccountPage = ({ type }) => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const navigate = useNavigate();
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 7;
+  const [pageLoading, setPageLoading] = useState(false);
 
   useEffect(() => {
     const fetchAccounts = async () => {
@@ -42,6 +45,19 @@ const AccountPage = ({ type }) => {
     navigate(`/admin/user-profile/${accountId}`);
   };
 
+  // Pagination logic
+  const totalPages = Math.ceil(accounts.length / itemsPerPage);
+  const paginatedAccounts = accounts.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
+
+  // Handle page change with spinner
+  const handlePageChange = (newPage) => {
+    setPageLoading(true);
+    setTimeout(() => {
+      setCurrentPage(newPage);
+      setPageLoading(false);
+    }, 400);
+  };
+
   if (loading) {
     return <Spinner />;
   }
@@ -71,9 +87,9 @@ const AccountPage = ({ type }) => {
               </tr>
             </thead>
             <tbody>
-              {accounts.map((account, index) => (
+              {paginatedAccounts.map((account, index) => (
                 <tr key={account.id} className="border-t">
-                  <td className="p-3">{index + 1}</td>
+                  <td className="p-3">{(currentPage - 1) * itemsPerPage + index + 1}</td>
                   <td className="p-3 flex items-center gap-2">
                     {type === "seller" && <FaUser className="text-blue-500" />}
                     {type === "customer" && <FaUsers className="text-green-500" />}
@@ -95,6 +111,38 @@ const AccountPage = ({ type }) => {
             </tbody>
           </table>
         </div>
+        {/* Pagination controls */}
+        {totalPages > 1 && (
+          <>
+            <div className="flex justify-center gap-2 mt-6">
+              <button
+                onClick={() => handlePageChange(Math.max(currentPage - 1, 1))}
+                className="px-3 py-1 bg-green-100 rounded-md flex items-center"
+                disabled={currentPage === 1 || pageLoading}
+              >
+                <FaChevronLeft className="text-green-700" />
+              </button>
+              {Array.from({ length: totalPages }, (_, idx) => (
+                <button
+                  key={idx}
+                  onClick={() => handlePageChange(idx + 1)}
+                  className={`px-3 py-1 rounded-md border ${currentPage === idx + 1 ? 'bg-green-100 text-green-700 border-green-700 font-bold' : 'bg-white text-gray-700 border-green-100'}`}
+                  disabled={pageLoading}
+                >
+                  {idx + 1}
+                </button>
+              ))}
+              <button
+                onClick={() => handlePageChange(Math.min(currentPage + 1, totalPages))}
+                className="px-3 py-1 bg-green-100 rounded-md flex items-center"
+                disabled={currentPage === totalPages || pageLoading}
+              >
+                <FaChevronRight className="text-green-700" />
+              </button>
+            </div>
+            {pageLoading && <div className="flex justify-center mt-2"><Spinner /></div>}
+          </>
+        )}
       </div>
     </AdminLayout>
   );

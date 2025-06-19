@@ -3,42 +3,46 @@ import { useState, useEffect } from "react";
 import { FaTrash } from "react-icons/fa";
 import useAuth from "../../hooks/useAuth";
 import axiosInstance from "../../api/axiosInstance";
+import { useNavigate } from "react-router-dom";
 
 const Reviews = () => {
-    const user = useAuth();
+    const { user } = useAuth();
     const [reviews, setReviews] = useState([]);
     const [searchTerm, setSearchTerm] = useState("");
     const [rowsPerPage, setRowsPerPage] = useState(5);
     const [currentPage, setCurrentPage] = useState(1);
     const [totalReviews, setTotalReviews] = useState(0);
-    const [loading, setLoading] = useState(false); // State to manage loading
+    const [loading, setLoading] = useState(false);
+    const navigate = useNavigate();
 
     useEffect(() => {
-        fetchReviews();
-    }, [user?.idSeller]);
+        if (!user?.idSeller) return;
+        fetchReviews(1, rowsPerPage);
+    }, [user?.idSeller, rowsPerPage]);
 
-    const fetchReviews = async () => {
+    const fetchReviews = async (page = 1, limit = rowsPerPage) => {
+        setLoading(true);
         try {
-            const response = await axiosInstance.get(`/reviews/seller/${user?.idSeller}`);
+            const response = await axiosInstance.get(`/reviews/seller/${user.idSeller}?page=${page}&limit=${limit}`);
             setReviews(response.data.data);
-            setTotalReviews(response.data.data.length);
-            await handlePageChange(1, rowsPerPage);
+            setTotalReviews(response.data.total || response.data.data.length);
+            setCurrentPage(page);
         } catch (error) {
+            setReviews([]);
+            setTotalReviews(0);
             console.error("Error fetching reviews:", error);
+        } finally {
+            setLoading(false);
         }
     };
 
-    const handlePageChange = async (page, rowsPerPage) => {
-        setLoading(true);
-        setCurrentPage(page);
-        const response = await axiosInstance.get(`/reviews/seller/${user?.idSeller}?page=${page}&limit=${rowsPerPage}`);
-        setReviews(response.data.data);
-        setLoading(false);
+    const handlePageChange = (page) => {
+        fetchReviews(page, rowsPerPage);
     };
 
-    const handleRowsPerPageChange = async (limit) => {
+    const handleRowsPerPageChange = (limit) => {
         setRowsPerPage(limit);
-        await handlePageChange(1, limit);
+        fetchReviews(1, limit);
     };
 
     const filteredReviews = reviews.filter(review =>
@@ -46,8 +50,18 @@ const Reviews = () => {
         review.user.name.toLowerCase().includes(searchTerm.toLowerCase())
     );
 
-    const handleDelete = (id) => {
-        console.log(`Delete review with id: ${id}`);
+    const handleDelete = async (id) => {
+        if (!window.confirm("Bạn có chắc chắn muốn xóa review này?")) return;
+        setLoading(true);
+        try {
+            await axiosInstance.delete(`/reviews/${id}`);
+            setReviews(reviews => reviews.filter(r => r.id !== id));
+            setTotalReviews(t => t - 1);
+        } catch (err) {
+            alert("Xóa review thất bại!");
+        } finally {
+            setLoading(false);
+        }
     };
 
     const totalPages = Math.ceil(totalReviews / rowsPerPage);
@@ -88,16 +102,17 @@ const Reviews = () => {
                             </tr>
                         </thead>
                         <tbody>
-                            {filteredReviews.map((review) => (
+                            {filteredReviews.map((review, idx) => (
                                 <tr key={review.id} className="border-b">
-                                    <td className="p-3">{review.id}</td>
-                                    <td className="p-3">{review.product.name}</td>
+                                    <td className="p-3">{(currentPage - 1) * rowsPerPage + idx + 1}</td>
+                                    <td className="p-3">
+                                        <button className="hover:text-blue-600" style={{ background: 'none', border: 'none', padding: 0, margin: 0, cursor: 'pointer' }} onClick={() => navigate(`/product/${review.productId}`)}>
+                                            {review.product.name}
+                                        </button>
+                                    </td>
                                     <td className="p-3">{review.user.name}</td>
                                     <td className="p-3">
-                                        {"⭐".repeat(review.rating)}{" "}
-                                        <span className="text-gray-400">
-                                            {"☆".repeat(5 - review.rating)}
-                                        </span>
+                                        {"⭐".repeat(review.rating)} <span className="text-gray-400">{"☆".repeat(5 - review.rating)}</span>
                                     </td>
                                     <td className="p-3">{review.date}</td>
                                     <td className="p-3">{review.comment}</td>
@@ -115,14 +130,14 @@ const Reviews = () => {
                     {Array.from({ length: totalPages }, (_, index) => (
                         <button
                             key={index}
-                            onClick={() => handlePageChange(index + 1, rowsPerPage)}
+                            onClick={() => handlePageChange(index + 1)}
                             className={`px-3 py-1 ${currentPage === index + 1 ? 'bg-blue-500 text-white' : 'border'}`}
                         >
                             {index + 1}
                         </button>
                     ))}
                     <button
-                        onClick={() => handlePageChange(currentPage + 1, rowsPerPage)}
+                        onClick={() => handlePageChange(currentPage + 1)}
                         className="px-3 py-1 border"
                         disabled={currentPage === totalPages}
                     >

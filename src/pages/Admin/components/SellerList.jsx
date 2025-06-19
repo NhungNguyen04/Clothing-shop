@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import AdminLayout from "./AdminLayout";
 import axiosInstance from "../../../api/axiosInstance";
 import Spinner from "../../../components/Spinner";
-import { FaCheck, FaTimes } from "react-icons/fa";
+import { FaCheck, FaTimes, FaChevronLeft, FaChevronRight } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
 
 export default function SellerList() {
@@ -11,7 +11,8 @@ export default function SellerList() {
   const [currentPage, setCurrentPage] = useState(1);
   const [sellers, setSellers] = useState([]);
   const [loading, setLoading] = useState(true);
-  const itemsPerPage = 10;
+  const [pageLoading, setPageLoading] = useState(false);
+  const itemsPerPage = 5;
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -71,6 +72,15 @@ export default function SellerList() {
     (currentPage - 1) * itemsPerPage,
     currentPage * itemsPerPage
   );
+
+  // Handle page change with spinner
+  const handlePageChange = (newPage) => {
+    setPageLoading(true);
+    setTimeout(() => {
+      setCurrentPage(newPage);
+      setPageLoading(false);
+    }, 400);
+  };
 
   if (loading) {
     return <Spinner />;
@@ -188,33 +198,35 @@ export default function SellerList() {
 
             {/* Phân trang */}
             {totalPages > 1 && (
+                <>
                 <div className="flex justify-center items-center mt-6 space-x-2">
                 <button
-                    onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
-                    className="px-3 py-1 bg-gray-200 rounded-md"
-                    disabled={currentPage === 1}
+                    onClick={() => handlePageChange(Math.max(currentPage - 1, 1))}
+                    className="px-3 py-1 bg-green-100 rounded-md flex items-center"
+                    disabled={currentPage === 1 || pageLoading}
                 >
-                    &larr; Back
+                    <FaChevronLeft className="text-green-700" />
                 </button>
                 {[...Array(totalPages)].map((_, index) => (
                     <button
-                    key={index}
-                    onClick={() => setCurrentPage(index + 1)}
-                    className={`px-3 py-1 rounded-md ${
-                        currentPage === index + 1 ? "bg-green-700 text-white" : "bg-gray-200"
-                    }`}
+                        key={index}
+                        onClick={() => handlePageChange(index + 1)}
+                        className={`px-3 py-1 rounded-md border ${currentPage === index + 1 ? 'bg-green-100 text-green-700 border-green-700 font-bold' : 'bg-white text-gray-700 border-green-100'}`}
+                        disabled={pageLoading}
                     >
-                    {index + 1}
+                        {index + 1}
                     </button>
                 ))}
                 <button
-                    onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
-                    className="px-3 py-1 bg-gray-200 rounded-md"
-                    disabled={currentPage === totalPages}
+                    onClick={() => handlePageChange(Math.min(currentPage + 1, totalPages))}
+                    className="px-3 py-1 bg-green-100 rounded-md flex items-center"
+                    disabled={currentPage === totalPages || pageLoading}
                 >
-                    Next &rarr;
+                    <FaChevronRight className="text-green-700" />
                 </button>
                 </div>
+                {pageLoading && <div className="flex justify-center mt-2"><Spinner /></div>}
+                </>
             )}
             </div>
     </AdminLayout>
