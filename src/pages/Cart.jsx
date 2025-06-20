@@ -7,6 +7,9 @@ import axiosInstance from "../api/axiosInstance";
 import { ShopContext } from "../context/ShopContext";
 import useAuth from '../hooks/useAuth';
 import Spinner from '../components/Spinner';
+import { toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+import { ToastContainer } from 'react-toastify';
 
 export default function Cart() {
   const navigate = useNavigate();
@@ -52,6 +55,12 @@ export default function Cart() {
   };
 
   const handleUpdateQuantity = async (cartItemId, newQuantity) => {
+    const item = cart.find(i => i.id === cartItemId);
+    const maxStock = item?.sizeStock?.quantity ?? 0;
+    if (newQuantity > maxStock) {
+      toast.error('Không đủ stock cho sản phẩm này!', { position: 'top-right' });
+      return;
+    }
     if (newQuantity < 1) return;
     setUpdatingId(cartItemId);
     try {
@@ -59,9 +68,7 @@ export default function Cart() {
       setCart((prev) => prev.map(item =>
         item.id === cartItemId ? { ...item, quantity: newQuantity, totalPrice: Number(item.sizeStock?.product?.price) * newQuantity } : item
       ));
-      // Optionally, re-fetch cart to ensure sync
     } catch (error) {
-      // Optionally show error toast
       console.error(error);
     } finally {
       setUpdatingId(null);
@@ -83,6 +90,7 @@ export default function Cart() {
 
   return (
     <div className="max-w-4xl mx-auto p-6 bg-white shadow rounded-lg">
+      <ToastContainer />
       {loading && <Spinner />}
       <div className="flex items-center">
         <h2 className="text-lg border-b pb-2 text-[#171717]">

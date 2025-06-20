@@ -1,11 +1,13 @@
 import { useState } from "react";
 import { FaEllipsisV, FaEdit, FaTrash } from "react-icons/fa";
 import { motion, AnimatePresence } from "framer-motion";
+import axiosInstance from "../../../api/axiosInstance";
+import { toast } from "react-toastify";
 
 const ITEMS_PER_PAGE = 6;
 
 // eslint-disable-next-line react/prop-types
-export default function ProductTable({ data, setIsOpen, setInitialData }) {
+export default function ProductTable({ data, setIsOpen, setInitialData, onDelete }) {
   const [dropdownOpen, setDropdownOpen] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
 
@@ -28,6 +30,18 @@ export default function ProductTable({ data, setIsOpen, setInitialData }) {
     setDropdownOpen(false)
     setInitialData(data)
   }
+
+  const handleDelete = async (product) => {
+    if (!window.confirm(`Bạn có chắc chắn muốn xóa sản phẩm "${product.name}"?`)) return;
+    try {
+      await axiosInstance.delete(`/products/${product.id}`);
+      toast.success("Xóa sản phẩm thành công!", { position: "top-right" });
+      if (onDelete) onDelete(product.id);
+    } catch (error) {
+      toast.error("Xóa sản phẩm thất bại!", { position: "top-right" });
+      console.error(error);
+    }
+  };
 
   const totalPages = Math.ceil(formattedProducts.length / ITEMS_PER_PAGE);
   const currentProducts = formattedProducts.length > 0 && formattedProducts.slice(
@@ -97,7 +111,7 @@ export default function ProductTable({ data, setIsOpen, setInitialData }) {
                       <button onClick={() => handleEdit(product)} className="flex items-center px-4 py-2 hover:bg-gray-100 w-full text-left">
                         <FaEdit className="mr-2 text-blue-500" /> Edit
                       </button>
-                      <button className="flex items-center px-4 py-2 hover:bg-gray-100 w-full text-left text-red-600">
+                      <button onClick={() => handleDelete(product)} className="flex items-center px-4 py-2 hover:bg-gray-100 w-full text-left text-red-600">
                         <FaTrash className="mr-2" /> Delete
                       </button>
                     </div>

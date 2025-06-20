@@ -3,6 +3,7 @@ import { toast } from "react-toastify";
 import { FaHourglassHalf, FaStore } from "react-icons/fa";
 import { ImSpinner8 } from "react-icons/im";
 import axiosInstance from "../../api/axiosInstance";
+import OTPInput from "../../components/OTPInput";
 import useAuth from "../../hooks/useAuth";
 import Sidebar from "../Admin/components/Sidebar";
 import Navbar from "../../components/Navbar"; 
@@ -20,6 +21,7 @@ const Seller = () => {
     postalCode: "",
     status: "PENDING",
   });
+  const [showOTP, setShowOTP] = useState(false);
 
   const fetchSellerInfo = useCallback(async () => {
     try {
@@ -37,16 +39,6 @@ const Seller = () => {
       fetchSellerInfo();
     }
   }, [user, fetchSellerInfo]);
-
-  useEffect(() => {
-    if (seller?.status === "APPROVED") {
-      const userData = JSON.parse(localStorage.getItem("user"));
-      if (userData && userData.role !== "SELLER") {
-        userData.role = "SELLER";
-        localStorage.setItem("user", JSON.stringify(userData));
-      }
-    }
-  }, [seller]);
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -70,12 +62,24 @@ const Seller = () => {
 
       const response = await axiosInstance.post("/sellers", payload);
       console.log("Đăng ký thành công:", response.data);
-      toast.success("Yêu cầu của bạn đã gửi thành công, vui lòng chờ quản trị viên duyệt.");
+      setShowOTP(true);
     } catch (error) {
       console.error("Lỗi đăng ký:", error);
       toast.error("Có lỗi xảy ra, vui lòng thử lại!");
     } finally {
       setIsSubmitting(false);
+    }
+  };
+
+  const handleConfirmOTP = async () => {
+    try {
+      toast.success(
+        "Yêu cầu của bạn đã gửi thành công, vui lòng chờ quản trị viên duyệt."
+      );
+      setShowOTP(false);
+    } catch (error) {
+      console.error("Lỗi xác thực OTP:", error);
+      toast.error("OTP không hợp lệ, vui lòng thử lại!");
     }
   };
 
@@ -170,6 +174,9 @@ const Seller = () => {
               )}
             </button>
           </form>
+          {showOTP && (
+            <OTPInput onConfirm={handleConfirmOTP} onClose={() => setShowOTP(false)} />
+          )}
         </div>
       </div>
     );
@@ -177,19 +184,17 @@ const Seller = () => {
 
   // ✅ Nếu seller.status === "APPROVED" -> Render trang quản lý bán hàng
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100">
-      <div className="flex w-screen h-screen">
-        <Sidebar />
-        <main className="flex-1 flex items-center justify-center bg-gray-100">
-          <div className="text-center">
-            <FaStore className="text-6xl text-gray-700 mx-auto mb-4" />
-            <h1 className="text-4xl font-bold text-gray-800">Trang quản lý bán hàng</h1>
-            <p className="text-lg text-gray-600 mt-2">
-              Quản lý sản phẩm, đơn hàng và nhiều hơn nữa!
-            </p>
-          </div>
-        </main>
-      </div>
+    <div className="flex w-screen h-screen">
+      <Sidebar />
+      <main className="flex-1 flex items-center justify-center bg-gray-100">
+        <div className="text-center">
+          <FaStore className="text-6xl text-gray-700 mx-auto mb-4" />
+          <h1 className="text-4xl font-bold text-gray-800">Trang quản lý bán hàng</h1>
+          <p className="text-lg text-gray-600 mt-2">
+            Quản lý sản phẩm, đơn hàng và nhiều hơn nữa!
+          </p>
+        </div>
+      </main>
     </div>
   );
 };

@@ -70,6 +70,15 @@ const DeliveryInformation = ({ deliveryInfo, onDeliveryChange }) => {
     <div>
       <h2 className="text-lg border-b pb-2 text-[#171717]">Your Information</h2>
       <form className="space-y-4">
+        {/* Full Name */}
+        <input
+          type="text"
+          name="name"
+          value={deliveryInfo.name || ""}
+          onChange={handleInputChange}
+          placeholder="Full Name"
+          className="w-full p-3 border rounded-lg"
+        />
 
         {/* Email */}
         <input

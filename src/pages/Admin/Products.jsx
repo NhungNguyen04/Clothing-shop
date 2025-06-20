@@ -7,6 +7,7 @@ import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import useSeller from "../../hooks/useSeller";
 import Spinner from "../../components/Spinner";
+import useAuth from "../../hooks/useAuth";
 
 
 export default function ProductList() {
@@ -17,6 +18,8 @@ export default function ProductList() {
     const [isAdding, setIsAdding] = useState(false);
     const [initialData, setInitialData] = useState({})
     const {seller, loading: sellerLoading, error: sellerError} = useSeller()
+    const {user} = useAuth()
+    const [isDeleting, setIsDeleting] = useState(false);
 
 
     const uploadImage = async (file) => {
@@ -101,7 +104,7 @@ export default function ProductList() {
 
     const handleExport = async () => {
         try {
-            const response = await axiosInstance.get('/products/export', {
+            const response = await axiosInstance.get(`/products/export?sellerId=${seller?.id}` , {
                 responseType: 'blob',
             });
             const url = window.URL.createObjectURL(new Blob([response.data]));
@@ -133,10 +136,11 @@ export default function ProductList() {
             });
             if (response.data.success) {
                 toast.success("Sản phẩm đã được nhập từ file Excel!", { position: "top-right" });
-                // You might want to re-fetch products after a successful import
-                // to update the table with new data.
-                // fetchProducts(); // Uncomment this if you have a way to trigger fetchProducts from here.
-                // For now, let's just log and rely on manual refresh or next page load.
+                // Reload product list after successful import
+                if (seller?.id) {
+                    const res = await axiosInstance.get(`/products/seller/${seller?.id}`);
+                    setProducts(res.data.data);
+                }
             } else {
                 toast.error("Lỗi khi nhập sản phẩm từ file Excel ❌", { position: "top-right" });
             }
@@ -146,6 +150,21 @@ export default function ProductList() {
         } finally {
             // Clear the input value so the same file can be selected again if needed
             event.target.value = null;
+        }
+    };
+
+    // Hàm reload lại danh sách sản phẩm
+    const reloadProducts = async () => {
+        setLoading(true);
+        try {
+            if(seller?.id) {
+                const response = await axiosInstance.get(`/products/seller/${seller?.id}`);
+                setProducts(response.data.data);
+            }
+        } catch (err) {
+            setError("Failed to reload products.");
+        } finally {
+            setLoading(false);
         }
     };
 
@@ -220,8 +239,18 @@ export default function ProductList() {
                     </div>
                 )}
 
+                {isDeleting && (
+                    <div className="flex justify-center mt-4">
+                        <Spinner />
+                    </div>
+                )}
+
                 <div>
-                    <ProductTable setInitialData = {setInitialData} setIsOpen={setIsOpen} data={products} />
+                    <ProductTable setInitialData={setInitialData} setIsOpen={setIsOpen} data={products} onDelete={async (id) => {
+                        setIsDeleting(true);
+                        await reloadProducts();
+                        setIsDeleting(false);
+                    }} />
                 </div>
             </div>
         </AdminLayout>
