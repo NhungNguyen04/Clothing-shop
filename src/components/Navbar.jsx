@@ -1,18 +1,55 @@
 import { useContext, useState } from 'react';
 import { assets } from '@/assets/assets';
-import { Link, NavLink } from 'react-router-dom';
+import { Link, NavLink, useNavigate } from 'react-router-dom';
 import { ShopContext } from '../context/ShopContext';
 import { useAuth } from '../context/AuthContext';
+import { useAuthStore } from '../store/AuthStore';
+import { toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 const Navbar = () => {
   const [visible, setVisible] = useState(false);
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const { setShowSearch, getCartCount } = useContext(ShopContext);
-  const { user, logout, isSeller, isAdmin } = useAuth();
+  const {logout } = useAuth();
+  const { user, isSeller, isAdmin, seller } = useAuthStore();
+  const navigate = useNavigate();
+  
+  const handleLogout = () => {
+    logout();
+    toast.success("Successfully logged out");
+    navigate('/');
+  }
+  
+  const handleSellerClick = (e) => {
+    e.preventDefault();
+    
+    if (!user) {
+      navigate('/login');
+      toast.error('Please login to access seller features');
+      return;
+    }
+    
+    if (isSeller) {
+      if (seller) {        if (seller.status === 'APPROVED') {
+          navigate('/seller');
+        } else if (seller.status === 'PENDING') {
+          navigate('/seller-register');
+          toast.info('Your seller application is pending approval');
+        } else if (seller.status === 'REJECTED') {
+          navigate('/seller-register');
+          toast.error('Your seller application was rejected. Please update and resubmit.');
+        }      } else {
+        navigate('/seller-register');
+      }
+    } else {
+      navigate('/seller-register');
+    }
+  };
   
   return (
     <div className='flex items-center justify-between py-5 font-medium relative'>
-      <Link to="/">
+    <Link to="/">
         <img src={assets.logo} alt="Logo" className='w-36 cursor-pointer'/>
       </Link>
       
@@ -24,15 +61,14 @@ const Navbar = () => {
           </NavLink>
         ))}
       </ul>
-
       <div className='flex items-center gap-6'>
         {user ? (
           <>
-            {isSeller && (
-              <Link to="/seller" className="px-4 py-2 bg-gray-800 text-white rounded-md text-sm hover:bg-gray-700">
+              <button 
+                onClick={handleSellerClick}
+                className="px-4 py-2 bg-gray-800 text-white rounded-md text-sm hover:bg-gray-700">
                 Seller Section
-              </Link>
-            )}
+              </button>
             
             {isAdmin && (
               <Link to="/admin/dashboard" className="px-4 py-2 bg-pink-600 text-white rounded-md text-sm hover:bg-pink-700">
@@ -51,9 +87,7 @@ const Navbar = () => {
               {dropdownOpen && (
                 <div className="absolute left-1/2 transform -translate-x-1/2 top-[110%] w-48 bg-white shadow-lg rounded-md py-2 z-50 border border-gray-200">
                   <button
-                    onClick={() => {
-                      logout(); // Use the logout function from AuthContext
-                    }}
+                    onClick={handleLogout}
                     className="block w-full text-left px-4 py-2 text-gray-700 hover:bg-gray-100"
                   >
                     Sign Out

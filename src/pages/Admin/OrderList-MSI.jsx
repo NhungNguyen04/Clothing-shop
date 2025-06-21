@@ -5,7 +5,7 @@ import axiosInstance from "../../api/axiosInstance";
 import useAuth from "../../hooks/useAuth";
 import { motion } from "framer-motion";
 import Spinner from "../../components/Spinner";
-import { ToastContainer, toast } from "react-toastify";
+import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
 const statusColors = {
@@ -95,7 +95,6 @@ export default function OrderList() {
 
   return (
     <AdminLayout>
-      <ToastContainer />
       <div className="p-6 bg-gray-100 min-h-screen">
         <h1 className="text-3xl font-semibold">Order List</h1>
         <p className="text-gray-500">Lorem ipsum dolor sit amet.</p>

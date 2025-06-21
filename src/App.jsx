@@ -1,7 +1,6 @@
 import { Route, Routes, Navigate, useLocation } from 'react-router-dom';
 import Home from './pages/Home';
 import Collection from './pages/Collection';
-import About from './pages/About';
 import Product from './pages/Product';
 import Cart from './pages/Cart';
 import Login from './pages/Login';
@@ -14,7 +13,6 @@ import 'react-toastify/dist/ReactToastify.css';
 import { ToastContainer } from 'react-toastify';
 import TryOn from './pages/TryOn';
 import CheckOut from './pages/CheckOut';
-import ContactUs from './pages/ContactUs';
 import Register from './pages/Register';
 import AuthSuccess from './pages/AuthSuccess';
 import AuthError from './pages/AuthError';
@@ -39,6 +37,7 @@ import SellerTransactions from './pages/Seller/Transactions';
 import SellerSettings from './pages/Seller/Settings';
 import GeminiChatbot from './components/GeminiChatbot';
 import SellerPage from './pages/SellerPage';
+import SellerRegister from './pages/SellerRegister';
 
 function App() {
   const location = useLocation();
@@ -57,8 +56,6 @@ function App() {
         <Route path="/" element={<Home />} />
         <Route path="/profile" element={<Profile />} />
         <Route path="/collection" element={<Collection />} />
-        <Route path="/about" element={<About />} />
-        <Route path="/contact" element={<ContactUs />} />
         <Route path="/product/:productId" element={<Product />} />
         <Route path="/cart" element={<Cart />} />
         <Route path="/check-out/:cartId" element={<CheckOut />} />
@@ -72,6 +69,7 @@ function App() {
         <Route path="/auth-error" element={<AuthError />} />
         <Route path="/order-success" element={<OrderSuccess />} />
         <Route path="/seller/:id" element={<SellerPage />} />
+        <Route path="/seller-register" element={<SellerRegister/>} />
 
         {/* Admin Routes */}
         <Route path="/admin/dashboard" element={isAdmin ? <Dashboard /> : <Navigate to="/" />} />

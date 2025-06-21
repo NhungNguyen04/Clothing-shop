@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
-import axiosInstance from "../api/axiosInstance";
 
-const DeliveryInformation = ({ deliveryInfo, onDeliveryChange }) => {
+const DeliveryInformation = ({ deliveryInfo, onDeliveryChange, onLocationChange }) => {
   const [provinces, setProvinces] = useState([]);
   const [districts, setDistricts] = useState([]);
   const [wards, setWards] = useState([]);
@@ -10,15 +9,19 @@ const DeliveryInformation = ({ deliveryInfo, onDeliveryChange }) => {
   const [tempData, setTempData] = useState({ street: "", ward: "", district: "", province: "" });
 
   useEffect(() => {
-    axiosInstance.get("https://provinces.open-api.vn/api/?depth=3")
-      .then((response) => setProvinces(response.data));
+    fetch("https://provinces.open-api.vn/api/?depth=3")
+      .then((res) => res.json())
+      .then((data) => setProvinces(data));
   }, []);
-
   const updateAddress = (newData) => {
     const { street, ward, district, province } = newData;
     if (street && ward && district && province) {
       const fullAddress = [street, ward, district, province].filter(Boolean).join(", ");
       onDeliveryChange("address", fullAddress);
+      
+      if (onLocationChange) {
+        onLocationChange({ ward, district, province });
+      }
     }
   };
 
@@ -47,14 +50,15 @@ const DeliveryInformation = ({ deliveryInfo, onDeliveryChange }) => {
     setTempData(newData);
     updateAddress(newData);
   };
-
   const handleWardChange = (e) => {
-    const ward = wards.find((w) => w.code === Number(e.target.value))?.name || "";
+    const wardCode = e.target.value;
+    const ward = wards.find((w) => w.code === Number(wardCode))?.name || "";
+    onDeliveryChange("ward", ward);
+    onDeliveryChange("wardCode", wardCode);
     const newData = { ...tempData, ward };
     setTempData(newData);
     updateAddress(newData);
   };
-
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     onDeliveryChange(name, value);
@@ -63,6 +67,10 @@ const DeliveryInformation = ({ deliveryInfo, onDeliveryChange }) => {
       const newData = { ...tempData, street: value };
       setTempData(newData);
       updateAddress(newData);
+    } else if (name === "postalCode") {
+      // Just pass the postal code value to the parent component
+      // No need to update the address string with the postal code
+      onDeliveryChange("postalCode", value);
     }
   };
 
@@ -118,25 +126,31 @@ const DeliveryInformation = ({ deliveryInfo, onDeliveryChange }) => {
               {district.name}
             </option>
           ))}
-        </select>
-
-        {/* Ward Select */}
-        <select className="w-full p-3 border rounded-lg" value={deliveryInfo.ward || ""} onChange={handleWardChange} disabled={!selectedDistrict}>
+        </select>        {/* Ward Select */}
+        <select className="w-full p-3 border rounded-lg" value={deliveryInfo.wardCode || ""} onChange={handleWardChange} disabled={!selectedDistrict}>
           <option value="">Select Ward</option>
           {wards.map((ward) => (
             <option key={ward.code} value={ward.code}>
               {ward.name}
             </option>
           ))}
-        </select>
-
-        {/* Street Address */}
+        </select>      {/* Street Address */}
         <input
           type="text"
           name="street"
           value={deliveryInfo.street || ""}
           onChange={handleInputChange}
           placeholder="Street"
+          className="w-full p-3 border rounded-lg"
+        />
+
+        {/* Postal Code */}
+        <input
+          type="text"
+          name="postalCode"
+          value={deliveryInfo.postalCode || ""}
+          onChange={handleInputChange}
+          placeholder="Postal Code"
           className="w-full p-3 border rounded-lg"
         />
       </form>

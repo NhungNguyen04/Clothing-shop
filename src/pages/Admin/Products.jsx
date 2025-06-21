@@ -3,7 +3,7 @@ import AdminLayout from "./components/AdminLayout";
 import ProductTable from "./components/ProductTable";
 import ProductForm from "./components/ProductForm";
 import axiosInstance from "../../api/axiosInstance";
-import { ToastContainer, toast } from "react-toastify";
+import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import useSeller from "../../hooks/useSeller";
 import Spinner from "../../components/Spinner";
@@ -199,7 +199,6 @@ export default function ProductList() {
 
     return (
         <AdminLayout>
-            <ToastContainer />
             <div className="p-6 bg-gray-50 min-h-screen">
                 <div className="flex justify-between items-center">
                     <div>
