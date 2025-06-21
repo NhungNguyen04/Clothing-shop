@@ -61,7 +61,7 @@ export default function CategoryPage() {
                         {dropdownOpen === category.id && (
                             <div className="absolute right-5 bg-white border border-gray-200 shadow-md rounded-lg w-32 z-20">
                                 <button className="flex items-center px-4 py-2 hover:bg-gray-100 w-full text-left">
-                                    <FaEdit className="mr-2 text-blue-500" /> Edit
+                                    <FaEdit className="mr-2 text-pink-500" /> Edit
                                 </button>
                                 <button className="flex items-center px-4 py-2 hover:bg-gray-100 w-full text-left text-red-600">
                                     <FaTrash className="mr-2" /> Delete

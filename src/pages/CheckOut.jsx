@@ -199,7 +199,7 @@ const CheckOut = () => {
                                     handleOpenQR();
                                 }}
                             />
-                            <span className="text-blue-600 font-bold">VietQR</span>
+                            <span className="text-pink-600 font-bold">VietQR</span>
                         </label>
                         <label className="flex items-center gap-2 border p-3 rounded-lg cursor-pointer">
                             <input
@@ -228,7 +228,7 @@ const CheckOut = () => {
                         {receiptPreview && (
                             <img src={receiptPreview} alt="Receipt Preview" className="mt-4 w-48 h-48 object-contain border rounded" />
                         )}
-                        {uploading && <div className="mt-2 text-blue-600">Đang upload...</div>}
+                        {uploading && <div className="mt-2 text-pink-600">Đang upload...</div>}
                         {receiptUrl && <div className="mt-2 text-green-600">Đã upload biên lai!</div>}
                         <button onClick={() => setShowQR(false)} className="mt-4 text-gray-600">Đóng</button>
                     </div>

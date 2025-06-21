@@ -1,8 +1,10 @@
 import { useEffect, useState } from 'react';
 import useAuth from '../hooks/useAuth';
 import Spinner from '../components/Spinner';
-import axiosInstance from '../api/axiosInstance';
+import { OrderService } from '../services/order';
 import { useNavigate } from 'react-router-dom';
+import { toast } from 'react-toastify';
+import WebOrderItem from '../components/WebOrderItem';
 
 const ORDERS_PER_PAGE = 3;
 
@@ -12,17 +14,35 @@ const Orders = () => {
   const [loading, setLoading] = useState(false);
   const [page, setPage] = useState(1);
   const navigate = useNavigate();
+  const fetchOrders = async () => {
+    if (!user || !user.id) return;
+    
+    setLoading(true);
+    try {
+      const response = await OrderService.getUserOrders(user.id);
+      if (response.success) {
+        setOrders(response.data || []);
+      } else {
+        setOrders([]);
+        toast.error(response.message || "Failed to load orders");
+      }
+    } catch (error) {
+      console.error("Error fetching orders:", error);
+      toast.error("An error occurred while loading your orders");
+      setOrders([]);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
-    if (!user || !user.id) return;
-    setLoading(true);
-    axiosInstance.get(`/orders/user/${user.id}`)
-      .then(res => {
-        setOrders(res.data.data || []);
-      })
-      .catch(() => setOrders([]))
-      .finally(() => setLoading(false));
+    fetchOrders();
   }, [user]);
+  
+  // Handle refresh after order cancellation
+  const handleOrderUpdated = () => {
+    fetchOrders();
+  };
 
   const totalPages = Math.ceil(orders.length / ORDERS_PER_PAGE);
   const paginatedOrders = orders.slice((page - 1) * ORDERS_PER_PAGE, page * ORDERS_PER_PAGE);
@@ -52,26 +72,17 @@ const Orders = () => {
             <div className="h-[2px] w-[25px] bg-black mb-2 ml-4"></div>
           </div>
       {loading && <Spinner />}
-          <div className="mt-4">
-        {paginatedOrders.length === 0 && !loading && (
+          <div className="mt-4">        {paginatedOrders.length === 0 && !loading && (
           <div className="text-center text-gray-500 py-8">No orders found.</div>
-        )}
-        {paginatedOrders.map(order => (
-          <div key={order.id} className="flex items-center justify-between border-b py-4">
-            <div>
-              <div className="font-semibold">Order #{order.id}</div>
-              <div className="text-sm text-gray-500">Date: {new Date(order.orderDate || order.createdAt).toLocaleDateString()}</div>
-              <div className="text-sm text-gray-500">Total: ${Number(order.totalPrice || order.totalCartValue).toFixed(2)}</div>
-              <div className="text-sm text-gray-500">Status: {getStatusButton(order.status)}</div>
-                      </div>
-            <button
-              className="ml-4 cursor-pointer border border-[#BABABA] rounded-md py-2 px-4"
-              onClick={() => navigate(`/orders/${order.id}`)}
-            >
-                  Track Order
-            </button>
-              </div>
-            ))}
+        )}        {paginatedOrders.map(order => (
+          <div key={order.id} className="mb-4">
+            <WebOrderItem 
+              order={order}
+              onPress={() => navigate(`/orders/${order.id}`)}
+              onCancelSuccess={handleOrderUpdated}
+            />
+          </div>
+        ))}
           </div>
       {totalPages > 1 && (
         <div className="flex justify-center gap-2 mt-6">

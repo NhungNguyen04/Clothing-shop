@@ -101,7 +101,7 @@ const Profile = () => {
             case 1: return 'bg-red-500';
             case 2: return 'bg-orange-500';
             case 3: return 'bg-yellow-500';
-            case 4: return 'bg-blue-500';
+            case 4: return 'bg-pink-500';
             case 5: return 'bg-green-500';
             default: return 'bg-gray-300';
         }
@@ -243,7 +243,7 @@ const Profile = () => {
                 {/* Profile Card */}
                 <div className="bg-white rounded-2xl shadow-xl overflow-hidden">
                     {/* Profile Header */}
-                    <div className="bg-gradient-to-r from-blue-600 to-indigo-600 px-8 py-12 text-white relative">
+                    <div className="bg-gradient-to-r from-pink-600 to-indigo-600 px-8 py-12 text-white relative">
                         <div className="flex flex-col items-center">
                             <div className="relative group">
                                 <div className="w-32 h-32 rounded-full overflow-hidden border-4 border-white shadow-lg bg-white">
@@ -276,8 +276,8 @@ const Profile = () => {
                                 </label>
                             </div>
                             <h2 className="text-2xl font-bold mt-4">{name || 'Your Name'}</h2>
-                            <p className="text-blue-100 mt-1">{email}</p>
-                            <p className="text-blue-100 text-sm mt-2">
+                            <p className="text-pink-100 mt-1">{email}</p>
+                            <p className="text-pink-100 text-sm mt-2">
                                 Member since {user?.createdAt ? new Date(user.createdAt).toLocaleDateString() : ''}
                             </p>
                         </div>
@@ -290,7 +290,7 @@ const Profile = () => {
                                 onClick={() => setActiveTab('profile')}
                                 className={`py-4 px-6 text-sm font-medium border-b-2 transition-colors ${
                                     activeTab === 'profile'
-                                        ? 'border-blue-500 text-blue-600'
+                                        ? 'border-pink-500 text-pink-600'
                                         : 'border-transparent text-gray-500 hover:text-gray-700'
                                 }`}
                             >
@@ -300,7 +300,7 @@ const Profile = () => {
                                 onClick={() => setActiveTab('security')}
                                 className={`py-4 px-6 text-sm font-medium border-b-2 transition-colors ${
                                     activeTab === 'security'
-                                        ? 'border-blue-500 text-blue-600'
+                                        ? 'border-pink-500 text-pink-600'
                                         : 'border-transparent text-gray-500 hover:text-gray-700'
                                 }`}
                             >
@@ -324,7 +324,7 @@ const Profile = () => {
                                             type="text"
                                             value={name}
                                             onChange={(e) => setName(e.target.value)}
-                                            className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                                            className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent transition-all"
                                             placeholder="Enter your full name"
                                             required
                                         />
@@ -342,7 +342,7 @@ const Profile = () => {
                                             type="email"
                                             value={email}
                                             onChange={(e) => setEmail(e.target.value)}
-                                            className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                                            className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent transition-all"
                                             placeholder="Enter your email address"
                                             required
                                         />
@@ -359,7 +359,7 @@ const Profile = () => {
                                             type="text"
                                             value={phoneNumber}
                                             onChange={(e) => setPhoneNumber(e.target.value)}
-                                            className="w-full pl-4 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                                            className="w-full pl-4 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent transition-all"
                                             placeholder="Enter your phone number"
                                             required
                                         />
@@ -371,7 +371,7 @@ const Profile = () => {
                                     <button
                                         onClick={handleSubmit}
                                         disabled={loading}
-                                        className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-3 rounded-lg font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                                        className="bg-pink-600 hover:bg-pink-700 text-white px-8 py-3 rounded-lg font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
                                     >
                                         {loading ? (
                                             <>
@@ -443,7 +443,7 @@ const Profile = () => {
                                         type={showOldPassword ? "text" : "password"}
                                         value={oldPassword}
                                         onChange={(e) => setOldPassword(e.target.value)}
-                                        className="w-full pl-10 pr-12 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                        className="w-full pl-10 pr-12 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent"
                                         required
                                     />
                                     <button
@@ -467,7 +467,7 @@ const Profile = () => {
                                         type={showNewPassword ? "text" : "password"}
                                         value={newPassword}
                                         onChange={handleNewPasswordChange}
-                                        className="w-full pl-10 pr-12 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                        className="w-full pl-10 pr-12 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent"
                                         required
                                     />
                                     <button
@@ -504,7 +504,7 @@ const Profile = () => {
                                         type={showRetypePassword ? "text" : "password"}
                                         value={retypeNewPassword}
                                         onChange={(e) => setRetypeNewPassword(e.target.value)}
-                                        className="w-full pl-10 pr-12 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                        className="w-full pl-10 pr-12 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent"
                                         required
                                     />
                                     <button
@@ -531,7 +531,7 @@ const Profile = () => {
                                 </button>
                                 <button
                                     onClick={handleChangePassword}
-                                    className="flex-1 bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-lg font-medium transition-colors"
+                                    className="flex-1 bg-pink-600 hover:bg-pink-700 text-white py-3 rounded-lg font-medium transition-colors"
                                 >
                                     Change Password
                                 </button>

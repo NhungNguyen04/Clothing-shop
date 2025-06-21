@@ -107,7 +107,7 @@ const Profile = () => {
                 <div className='flex justify-end'>
                     <button
                         type="submit"
-                        className={`bg-blue-600 text-white px-4 py-2 rounded-md ${loading ? 'opacity-50' : ''}`}
+                        className={`bg-pink-600 text-white px-4 py-2 rounded-md ${loading ? 'opacity-50' : ''}`}
                         disabled={loading}
                     >
                         {loading ? 'Updating...' : 'Update Profile'}
@@ -159,7 +159,7 @@ const Profile = () => {
                             </div>
                             <button
                                 type="submit"
-                                className="bg-blue-600 text-white px-4 py-2 rounded-md"
+                                className="bg-pink-600 text-white px-4 py-2 rounded-md"
                             >
                                 Change Password
                             </button>

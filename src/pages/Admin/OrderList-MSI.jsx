@@ -10,7 +10,7 @@ import "react-toastify/dist/ReactToastify.css";
 
 const statusColors = {
   "PENDING": "bg-orange-100 text-orange-700",
-  "SHIPPED": "bg-blue-100 text-blue-700",
+  "SHIPPED": "bg-pink-100 text-pink-700",
   "DELIVERED": "bg-green-100 text-green-700",
   "CANCELLED": "bg-red-100 text-red-700",
 };
@@ -186,7 +186,7 @@ export default function OrderList() {
                     {dropdownOpen === order.id && (
                       <div className="absolute right-5 bg-white border border-gray-200 shadow-md rounded-lg w-32 z-20">
                         <button onClick={() => openDetailModal(order)} className="flex items-center px-4 py-2 hover:bg-gray-100 w-full text-left">
-                          <FaEdit className="mr-2 text-blue-500" /> Detail
+                          <FaEdit className="mr-2 text-pink-500" /> Detail
                         </button>
                         <button className="flex items-center px-4 py-2 hover:bg-gray-100 w-full text-left text-red-600">
                           <FaTrash className="mr-2" /> Delete

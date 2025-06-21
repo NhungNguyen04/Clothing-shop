@@ -26,7 +26,7 @@ function AuthError() {
       <p className="text-gray-600 mb-4">Redirecting you to the login page...</p>
       <button 
         onClick={() => navigate('/login')} 
-        className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+        className="px-4 py-2 bg-pink-600 text-white rounded hover:bg-pink-700"
       >
         Go to Login
       </button>

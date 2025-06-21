@@ -10,6 +10,8 @@ import { BiImageAdd } from 'react-icons/bi';
 import { MdVerified } from 'react-icons/md';
 import useAuth from '../hooks/useAuth';
 import Spinner from '../components/Spinner';
+import { fetchProductById } from '../services/product';
+import { createReviewApi, updateReviewApi, deleteReviewApi, getReviewsByProduct } from '../services/review';
 
 const Product = () => {
   const { productId } = useParams();
@@ -32,48 +34,48 @@ const Product = () => {
   const [loadingReviews, setLoadingReviews] = useState(false);
   const [enlargedImage, setEnlargedImage] = useState(null);
   const [isWishlisted, setIsWishlisted] = useState(false);
-
+  const [editingReview, setEditingReview] = useState(null);
+  const [editReviewText, setEditReviewText] = useState('');
+  const [editReviewRating, setEditReviewRating] = useState(5);
+  const [deletingReview, setDeletingReview] = useState(false);
   const fetchProductData = useCallback(async () => {
     setLoading(true);
     try {
-      const response = await axiosInstance.get(`/products/${productId}`);
-      if (response.data.success) {
-        const product = response.data.data;
-        setProductData(product);
-        setImage(product.image[0]);
-      }
+      const product = await fetchProductById(productId);
+      setProductData(product);
+      setImage(product.image[0]);
     } catch (error) {
       console.error('Error fetching product:', error);
+      toast.error('Failed to load product details');
     } finally {
       setLoading(false);
     }
   }, [productId]);
-
   const fetchReviews = useCallback(async () => {
     setLoadingReviews(true);
     try {
-      const response = await axiosInstance.get(`/reviews/${productId}`);
-      if (response.data.success) {
-        const fetchedReviews = response.data.data.map(review => ({
-          ...review,
-          avatar: review.user.image,
-          name: review.user.name,
-          time: formatReviewTime(review.createdAt),
-        }));
-        setReviews(fetchedReviews);
-      }
+      const fetchedReviewsData = await getReviewsByProduct(productId);
+      const fetchedReviews = fetchedReviewsData.map(review => ({
+        ...review,
+        avatar: review.user?.image,
+        name: review.user?.name,
+        time: formatReviewTime(review.createdAt),
+        isOwner: user?.id === review.userId // Add flag if user is review owner
+      }));
+      setReviews(fetchedReviews);
     } catch (error) {
       console.error('Error fetching reviews:', error);
+      toast.error('Failed to load reviews');
     } finally {
       setLoadingReviews(false);
     }
-  }, [productId]);
+  }, [productId, user?.id]);
 
   useEffect(() => {
     fetchProductData();
     fetchReviews();
   }, [fetchProductData, fetchReviews]);
-
+  console.log("Product data:", productData);
   const formatReviewTime = (createdAt) => {
     const reviewDate = new Date(createdAt);
     const now = new Date();
@@ -138,7 +140,7 @@ const Product = () => {
       <div className="flex justify-center items-center py-20">
         <div className="text-center">
           <p className="text-xl text-gray-600">Product not found</p>
-          <Link to="/" className="mt-4 inline-block bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition-colors">
+          <Link to="/" className="mt-4 inline-block bg-pink-600 text-white px-6 py-2 rounded-lg hover:bg-pink-700 transition-colors">
             Back to Home
           </Link>
         </div>
@@ -234,12 +236,13 @@ const Product = () => {
       }
 
       imageUrls.forEach(url => formData.append('images', url));
-      const response = await axiosInstance.post('http://[::1]:3300/reviews', formData);
+      const response = await createReviewApi(formData);
+      console.log(response);
       const newReview = {
-        ...response.data.data,
-        avatar: response.data.data.user.image,
-        name: response.data.data.user.name,
-        time: formatReviewTime(response.data.data.createdAt),
+        ...response,
+        avatar: response.user.image,
+        name: response.user.name,
+        time: formatReviewTime(response.createdAt),
       };
 
       setReviews([newReview, ...reviews]);
@@ -252,6 +255,55 @@ const Product = () => {
       toast.error('Failed to submit review.');
     } finally {
       setSubmittingReview(false);
+    }
+  };
+
+  const handleEditReview = (review) => {
+    setEditingReview(review);
+    setEditReviewText(review.comment || '');
+    setEditReviewRating(review.rating || 5);
+  };
+
+  const cancelEditReview = () => {
+    setEditingReview(null);
+    setEditReviewText('');
+    setEditReviewRating(5);
+  };
+
+  const saveEditReview = async () => {
+    if (!editingReview || !editingReview.id) return;
+    
+    try {
+      setSubmittingReview(true);
+      await updateReviewApi(editingReview.id, {
+        rating: editReviewRating,
+        comment: editReviewText,
+      });
+      
+      toast.success('Review updated successfully');
+      await fetchReviews(); // Refresh reviews
+      cancelEditReview();
+    } catch (error) {
+      console.error('Error updating review:', error);
+      toast.error('Failed to update review');
+    } finally {
+      setSubmittingReview(false);
+    }
+  };
+
+  const handleDeleteReview = async (reviewId) => {
+    if (!reviewId || !window.confirm('Are you sure you want to delete this review?')) return;
+    
+    try {
+      setDeletingReview(true);
+      await deleteReviewApi(reviewId);
+      toast.success('Review deleted successfully');
+      await fetchReviews(); // Refresh reviews
+    } catch (error) {
+      console.error('Error deleting review:', error);
+      toast.error('Failed to delete review');
+    } finally {
+      setDeletingReview(false);
     }
   };
 
@@ -277,7 +329,7 @@ const Product = () => {
       <div className="bg-white border-b">
         <div className="max-w-7xl mx-auto px-4 py-3">
           <nav className="text-sm text-gray-600">
-            <Link to="/" className="hover:text-blue-600">Home</Link>
+            <Link to="/" className="hover:text-pink-600">Home</Link>
             <span className="mx-2">/</span>
             <span className="text-gray-800">{productData.name}</span>
           </nav>
@@ -285,7 +337,6 @@ const Product = () => {
       </div>
 
       <div className="max-w-7xl mx-auto px-4 py-8">
-        <div className="bg-white rounded-2xl shadow-lg overflow-hidden">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 p-8">
             {/* Product Images */}
             <div className="space-y-4">
@@ -310,7 +361,7 @@ const Product = () => {
                 src={item}
                     alt={`${productData.name} ${index + 1}`}
                     className={`w-20 h-20 object-cover rounded-lg cursor-pointer flex-shrink-0 border-2 transition-all ${
-                      item === image ? 'border-blue-500 ring-2 ring-blue-200' : 'border-gray-200 hover:border-gray-300'
+                      item === image ? 'border-pink-500 ring-2 ring-pink-200' : 'border-gray-200 hover:border-gray-300'
                     }`}
                 onClick={() => setImage(item)}
               />
@@ -318,31 +369,48 @@ const Product = () => {
           </div>
             </div>
 
-            {/* Product Info */}
-            <div className="space-y-6">
-              <div>
-                <h1 className="text-3xl font-bold text-gray-900 mb-2">{productData.name}</h1>
-                <div className="flex items-center gap-4">
-                  <div className="flex items-center gap-1">
-                    {renderStars(productData.averageRating || 0)}
-                    <span className="ml-2 text-lg font-semibold text-gray-700">
-                      {(productData.averageRating || 0).toFixed(1)}
-                    </span>
-                  </div>
-                  <span className="text-gray-500">({reviews.length} reviews)</span>
-          </div>
-        </div>
+                  <div className="space-y-6">
+                    <div>
+                    <h1 className="text-3xl font-bold text-gray-900 mb-2">{productData.name}</h1>
+                    <div className="flex items-center gap-4">
+                      <div className="flex items-center gap-1">
+                      {renderStars(productData.averageRating || 0)}
+                      <span className="ml-2 text-lg font-semibold text-gray-700">
+                        {(productData.averageRating || 0).toFixed(1)}
+                      </span>
+                      </div>
+                      <span className="text-gray-500">({reviews.length} reviews)</span>
+                      {productData.averageRating >= 4.5 && (
+                      <span className="bg-green-100 text-green-800 text-xs px-2 py-1 rounded-full font-medium">
+                        Highly Rated
+                      </span>
+                      )}
+                    </div>
+                    </div>
 
-              <div className="flex items-baseline gap-3">
-                <span className="text-4xl font-bold text-blue-600">${productData.price}</span>
-                {productData.originalPrice && (
-                  <span className="text-xl text-gray-500 line-through">${productData.originalPrice}</span>
-                )}
-              </div>
+                    <div className="flex items-baseline gap-3">
+                    <span className="text-4xl font-bold text-pink-600">${productData.price}</span>
+                    {productData.originalPrice && (
+                      <span className="text-xl text-gray-500 line-through">${productData.originalPrice}</span>
+                    )}
+                    </div>
 
-              <p className="text-gray-600 leading-relaxed">{productData.description}</p>
+                    <div className="flex items-center gap-2">
+                    {productData.seller?.image && (
+                      <img
+                      src={productData.seller.image}
+                      alt={productData.seller?.managerName || "Seller"}
+                      className="w-8 h-8 rounded-full object-cover border-2 border-pink-200"
+                      />
+                    )}
+                    <Link to={`/seller/${productData.sellerId}`} className="text-pink-600 hover:text-pink-800 font-medium flex items-center">
+                      {productData.seller?.managerName || "Seller"}
+                    </Link>
+                    </div>
 
-              {/* Size Selection */}
+                    <p className="text-gray-600 leading-relaxed">{productData.description}</p>
+
+                    {/* Size Selection */}
               <div className="space-y-3">
                 <h3 className="font-semibold text-gray-900">Select Size</h3>
                 <div className="flex gap-2 flex-wrap">
@@ -352,7 +420,7 @@ const Product = () => {
                   onClick={() => setSize(item.size)}
                       className={`px-4 py-2 border-2 rounded-lg font-medium transition-all ${
                         item.size === size 
-                          ? 'border-blue-500 bg-blue-50 text-blue-700' 
+                          ? 'border-pink-500 bg-pink-50 text-pink-700' 
                           : 'border-gray-300 hover:border-gray-400 text-gray-700'
                       }`}
                 >
@@ -382,7 +450,7 @@ const Product = () => {
               </button>
                   </div>
                   <div className="text-lg">
-                    Total: <span className="font-bold text-blue-600">${totalPrice}</span>
+                    Total: <span className="font-bold text-pink-600">${totalPrice}</span>
                   </div>
             </div>
           </div>
@@ -390,7 +458,7 @@ const Product = () => {
               {/* Action Buttons */}
               <div className="flex gap-3 pt-4">
             <button
-                  className="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-6 rounded-lg transition-colors flex items-center justify-center gap-2 disabled:opacity-50"
+                  className="flex-1 bg-pink-600 hover:bg-pink-700 text-white font-semibold py-3 px-6 rounded-lg transition-colors flex items-center justify-center gap-2 disabled:opacity-50"
               onClick={handleAddToCart}
                   disabled={addingToCart || !size}
             >
@@ -447,15 +515,13 @@ const Product = () => {
             </button>
           </div>
         </div>
-      </div>
-
         {/* Tabs Section */}
         <div className="mt-8 bg-white rounded-2xl shadow-lg overflow-hidden">
           <div className="flex border-b">
           <button
               className={`px-8 py-4 font-semibold transition-all ${
                 activeTab === 'description' 
-                  ? 'bg-blue-600 text-white' 
+                  ? 'bg-pink-600 text-white' 
                   : 'bg-gray-50 text-gray-600 hover:bg-gray-100'
               }`}
             onClick={() => setActiveTab('description')}
@@ -465,7 +531,7 @@ const Product = () => {
           <button
               className={`px-8 py-4 font-semibold transition-all flex items-center gap-2 ${
                 activeTab === 'review' 
-                  ? 'bg-blue-600 text-white' 
+                  ? 'bg-pink-600 text-white' 
                   : 'bg-gray-50 text-gray-600 hover:bg-gray-100'
               }`}
               onClick={() => {
@@ -474,7 +540,7 @@ const Product = () => {
               }}
             >
               Reviews
-              <span className="bg-blue-100 text-blue-800 px-2 py-1 rounded-full text-xs">
+              <span className="bg-pink-100 text-pink-800 px-2 py-1 rounded-full text-xs">
                 {reviews.length}
               </span>
           </button>
@@ -490,7 +556,7 @@ const Product = () => {
                 {/* Review Stats */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-8 bg-gray-50 rounded-xl p-6">
                   <div className="text-center">
-                    <div className="text-4xl font-bold text-blue-600 mb-2">
+                    <div className="text-4xl font-bold text-pink-600 mb-2">
                       {average.toFixed(1)}
                     </div>
                     <div className="flex justify-center mb-2">
@@ -521,7 +587,7 @@ const Product = () => {
 
                 {/* Write Review Section */}
                 {user && (
-                  <div className="bg-gradient-to-r from-blue-50 to-purple-50 rounded-xl p-6 border border-blue-100">
+                  <div className="bg-gradient-to-r from-pink-50 to-purple-50 rounded-xl p-6 border border-pink-100">
                     <h3 className="text-xl font-semibold mb-4 text-gray-800">Write a Review</h3>
                     
                     <div className="space-y-4">
@@ -543,7 +609,7 @@ const Product = () => {
                 value={reviewText}
                 onChange={(e) => setReviewText(e.target.value)}
                           placeholder="Share your experience with this product..."
-                          className="w-full border border-gray-300 rounded-lg p-4 h-32 resize-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                          className="w-full border border-gray-300 rounded-lg p-4 h-32 resize-none focus:ring-2 focus:ring-pink-500 focus:border-transparent"
               />
                       </div>
                       
@@ -555,7 +621,7 @@ const Product = () => {
                           {[0, 1, 2].map((index) => (
                             <div 
                               key={index} 
-                              className="relative w-20 h-20 border-2 border-dashed border-gray-300 rounded-lg hover:border-blue-400 transition-colors"
+                              className="relative w-20 h-20 border-2 border-dashed border-gray-300 rounded-lg hover:border-pink-400 transition-colors"
                             >
                               {reviewImages[index] ? (
                                 <>
@@ -588,7 +654,7 @@ const Product = () => {
               </div>
                       
                 <button
-                        className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-semibold py-3 px-8 rounded-lg transition-all transform hover:scale-105 disabled:opacity-50 disabled:transform-none flex items-center gap-2"
+                        className="bg-gradient-to-r from-pink-600 to-purple-600 hover:from-pink-700 hover:to-purple-700 text-white font-semibold py-3 px-8 rounded-lg transition-all transform hover:scale-105 disabled:opacity-50 disabled:transform-none flex items-center gap-2"
                   onClick={submitReview}
                         disabled={submittingReview || !reviewText.trim()}
                       >
@@ -632,14 +698,13 @@ const Product = () => {
                                   className="w-12 h-12 rounded-full object-cover border-2 border-gray-200" 
                                 />
                               ) : (
-                                <div className="w-12 h-12 bg-gradient-to-br from-blue-400 to-purple-500 rounded-full flex items-center justify-center text-white font-semibold">
+                                <div className="w-12 h-12 bg-gradient-to-br from-pink-400 to-purple-500 rounded-full flex items-center justify-center text-white font-semibold">
                                   {review.name?.charAt(0)?.toUpperCase() || 'U'}
           </div>
         )}
       </div>
 
-                            <div className="flex-1">
-                              <div className="flex items-center justify-between mb-2">
+                            <div className="flex-1">                              <div className="flex items-center justify-between mb-2">
                                 <div>
                                   <h4 className="font-semibold text-gray-900">{review.name}</h4>
                                   <p className="text-sm text-gray-500">{review.time}</p>
@@ -649,7 +714,59 @@ const Product = () => {
                                 </div>
                               </div>
                               
-                              <p className="text-gray-700 leading-relaxed mb-4">{review.comment}</p>
+                              {editingReview?.id === review.id ? (
+                                <div className="mb-4">
+                                  <textarea
+                                    value={editReviewText}
+                                    onChange={(e) => setEditReviewText(e.target.value)}
+                                    className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-pink-500 focus:border-transparent mb-2"
+                                    rows={3}
+                                    placeholder="Edit your review..."
+                                  />
+                                  <div className="flex items-center mb-2">
+                                    <span className="mr-2">Rating:</span>
+                                    <div className="flex">
+                                      {renderStars(editReviewRating, true, setEditReviewRating)}
+                                    </div>
+                                  </div>
+                                  <div className="flex gap-2 justify-end">
+                                    <button 
+                                      onClick={cancelEditReview}
+                                      className="px-3 py-1 bg-gray-200 hover:bg-gray-300 rounded text-sm"
+                                      disabled={submittingReview}
+                                    >
+                                      Cancel
+                                    </button>
+                                    <button 
+                                      onClick={saveEditReview}
+                                      className="px-3 py-1 bg-pink-600 hover:bg-pink-700 text-white rounded text-sm"
+                                      disabled={submittingReview}
+                                    >
+                                      {submittingReview ? 'Saving...' : 'Save'}
+                                    </button>
+                                  </div>
+                                </div>
+                              ) : (
+                                <p className="text-gray-700 leading-relaxed mb-4">{review.comment}</p>
+                              )}
+                              
+                              {review.isOwner && !editingReview && (
+                                <div className="flex gap-2 mt-2 mb-2">
+                                  <button 
+                                    onClick={() => handleEditReview(review)}
+                                    className="text-pink-600 hover:text-pink-800 text-sm font-medium"
+                                  >
+                                    Edit
+                                  </button>
+                                  <button 
+                                    onClick={() => handleDeleteReview(review.id)}
+                                    className="text-red-600 hover:text-red-800 text-sm font-medium"
+                                    disabled={deletingReview}
+                                  >
+                                    {deletingReview ? 'Deleting...' : 'Delete'}
+                                  </button>
+                                </div>
+                              )}
                               
                               {review.images && review.images.length > 0 && (
                                 <div className="flex gap-2">
@@ -680,7 +797,7 @@ const Product = () => {
                               onClick={() => setCurrentPage(index + 1)}
                               className={`px-4 py-2 rounded-lg font-medium transition-colors ${
                                 currentPage === index + 1 
-                                  ? 'bg-blue-600 text-white' 
+                                  ? 'bg-pink-600 text-white' 
                                   : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
                               }`}
                             >

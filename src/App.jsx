@@ -38,6 +38,7 @@ import SellerDashboard from './pages/Seller/SellerDashboard';
 import SellerTransactions from './pages/Seller/Transactions';
 import SellerSettings from './pages/Seller/Settings';
 import GeminiChatbot from './components/GeminiChatbot';
+import SellerPage from './pages/SellerPage';
 
 function App() {
   const location = useLocation();
@@ -70,6 +71,7 @@ function App() {
         <Route path="/auth-success" element={<AuthSuccess />} />
         <Route path="/auth-error" element={<AuthError />} />
         <Route path="/order-success" element={<OrderSuccess />} />
+        <Route path="/seller/:id" element={<SellerPage />} />
 
         {/* Admin Routes */}
         <Route path="/admin/dashboard" element={isAdmin ? <Dashboard /> : <Navigate to="/" />} />

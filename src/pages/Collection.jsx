@@ -176,6 +176,8 @@ function Collection() {
                     id={item.id}
                     price={item.price}
                     image={item.image}
+                    averageRating={item.averageRating}
+                    reviews={item.reviews}
                   />
                 ))
               }
@@ -190,7 +192,7 @@ function Collection() {
                     setCurrentPage(index + 1);
                     handlePageChange(index + 1);
                   }}
-                  className={`px-3 py-1 border ${currentPage === index + 1 ? 'bg-blue-500 text-white' : 'text-gray-700'}`}
+                  className={`px-3 py-1 border ${currentPage === index + 1 ? 'bg-pink-500 text-white' : 'text-gray-700'}`}
                 >
                   {index + 1}
                 </button>

@@ -131,7 +131,7 @@ function AuthSuccess() {
           <p className="text-gray-600 mb-4">Redirecting to login page...</p>
           <button 
             onClick={() => navigate('/login')} 
-            className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+            className="px-4 py-2 bg-pink-600 text-white rounded hover:bg-pink-700"
           >
             Go to Login
           </button>
@@ -149,7 +149,7 @@ function AuthSuccess() {
           <p className="font-bold text-sm">Debug Information:</p>
           <button 
             onClick={() => navigator.clipboard.writeText(JSON.stringify(debugInfo, null, 2))}
-            className="px-2 py-1 bg-blue-500 text-white text-xs rounded hover:bg-blue-600"
+            className="px-2 py-1 bg-pink-500 text-white text-xs rounded hover:bg-pink-600"
           >
             Copy Debug Info
           </button>

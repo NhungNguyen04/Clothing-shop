@@ -17,7 +17,7 @@ const Navbar = () => {
       </Link>
       
       <ul className='hidden sm:flex gap-5 text-sm text-gray-700'>
-        {['HOME', 'COLLECTION', 'ABOUT', 'CONTACT'].map((item) => (
+        {['HOME', 'COLLECTION', 'ORDERS', 'PROFILE'].map((item) => (
           <NavLink key={item} to={`/${item === "HOME" ? "" : item.toLowerCase()}`} className="flex flex-col items-center gap-1">
             <p>{item}</p>
             <hr className='w-2/4 border-none h-[1.5px] bg-gray-700 hidden'/>
@@ -30,12 +30,12 @@ const Navbar = () => {
           <>
             {isSeller && (
               <Link to="/seller" className="px-4 py-2 bg-gray-800 text-white rounded-md text-sm hover:bg-gray-700">
-                Trang dành cho người bán hàng
+                Seller Section
               </Link>
             )}
             
             {isAdmin && (
-              <Link to="/admin/dashboard" className="px-4 py-2 bg-blue-600 text-white rounded-md text-sm hover:bg-blue-700">
+              <Link to="/admin/dashboard" className="px-4 py-2 bg-pink-600 text-white rounded-md text-sm hover:bg-pink-700">
                 Admin Dashboard
               </Link>
             )}
@@ -50,8 +50,6 @@ const Navbar = () => {
               </div>
               {dropdownOpen && (
                 <div className="absolute left-1/2 transform -translate-x-1/2 top-[110%] w-48 bg-white shadow-lg rounded-md py-2 z-50 border border-gray-200">
-                  <Link to="/profile" className="block px-4 py-2 text-gray-700 hover:bg-gray-100">My Profile</Link>
-                  <Link to="/orders" className="block px-4 py-2 text-gray-700 hover:bg-gray-100">Orders</Link>
                   <button
                     onClick={() => {
                       logout(); // Use the logout function from AuthContext

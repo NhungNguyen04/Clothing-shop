@@ -52,6 +52,13 @@ export interface ApiResponse {
   data: Product[];
 }
 
+export interface SingleProductResponse {
+  success: boolean;
+  message: string;
+  error: string | null;
+  data: Product;
+}
+
 // Function to fetch all products
 export const fetchAllProducts = async (): Promise<Product[]> => {
   try {
@@ -71,4 +78,23 @@ export const fetchAllProducts = async (): Promise<Product[]> => {
     throw error;
   }
 };
+
+// Function to fetch a single product by ID
+export const fetchProductById = async (productId: string): Promise<Product> => {
+  try {
+    const response = await axiosInstance.get(`/products/${productId}`);
+    const result: SingleProductResponse = response.data;
+    
+    if (!result.success) {
+      throw new Error(result.error || 'Failed to fetch product');
+    }
+    
+    return result.data;
+  } catch (error) {
+    console.error(`Error fetching product with ID ${productId}:`, error);
+    throw error;
+  }
+};
+
+
 

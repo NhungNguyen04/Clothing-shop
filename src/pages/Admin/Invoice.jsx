@@ -36,7 +36,7 @@ export default function Invoice() {
           email: "juanfer@gmail.com",
         },
         items: [
-          { description: "T-shirt blue, XXL size", quantity: 3, price: 60.0 },
+          { description: "T-shirt pink, XXL size", quantity: 3, price: 60.0 },
           { description: "Winter jacket for men", quantity: 1, price: 20.0 },
           { description: "Jeans wear for men", quantity: 2, price: 18.0 },
         ],
@@ -89,7 +89,7 @@ export default function Invoice() {
             onKeyPress={handleKeyPress}
           />
           <button
-            className="bg-blue-600 text-white px-4 py-2 rounded-md flex items-center gap-2"
+            className="bg-pink-600 text-white px-4 py-2 rounded-md flex items-center gap-2"
             onClick={handleSearch}
           >
             <FaSearch /> Search
