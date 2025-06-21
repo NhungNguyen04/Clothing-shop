@@ -2,13 +2,14 @@ import { useContext, useState } from 'react';
 import { assets } from '@/assets/assets';
 import { Link, NavLink } from 'react-router-dom';
 import { ShopContext } from '../context/ShopContext';
-import useAuth from '../hooks/useAuth';
+import { useAuth } from '../context/AuthContext';
 
 const Navbar = () => {
   const [visible, setVisible] = useState(false);
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const { setShowSearch, getCartCount } = useContext(ShopContext);
-  const {user} = useAuth();
+  const { user, logout, isSeller, isAdmin } = useAuth();
+  
   return (
     <div className='flex items-center justify-between py-5 font-medium relative'>
       <Link to="/">
@@ -27,9 +28,17 @@ const Navbar = () => {
       <div className='flex items-center gap-6'>
         {user ? (
           <>
-            <Link to="/seller" className="px-4 py-2 bg-gray-800 text-white rounded-md text-sm hover:bg-gray-700">
-              Trang dành cho người bán hàng
-            </Link>
+            {isSeller && (
+              <Link to="/seller" className="px-4 py-2 bg-gray-800 text-white rounded-md text-sm hover:bg-gray-700">
+                Trang dành cho người bán hàng
+              </Link>
+            )}
+            
+            {isAdmin && (
+              <Link to="/admin/dashboard" className="px-4 py-2 bg-blue-600 text-white rounded-md text-sm hover:bg-blue-700">
+                Admin Dashboard
+              </Link>
+            )}
             
             <div className="relative">
               <div className="w-12 h-12 rounded-full overflow-hidden cursor-pointer border border-gray-300" onClick={() => setDropdownOpen(!dropdownOpen)}>
@@ -45,45 +54,51 @@ const Navbar = () => {
                   <Link to="/orders" className="block px-4 py-2 text-gray-700 hover:bg-gray-100">Orders</Link>
                   <button
                     onClick={() => {
-                      localStorage.removeItem("user");
-                      window.location.reload();
+                      logout(); // Use the logout function from AuthContext
                     }}
-                    className="w-full text-left px-4 py-2 text-red-600 hover:bg-red-100"
+                    className="block w-full text-left px-4 py-2 text-gray-700 hover:bg-gray-100"
                   >
-                    Logout
+                    Sign Out
                   </button>
                 </div>
               )}
             </div>
           </>
         ) : (
-          <Link to="/login" className="px-4 py-2 border border-[#e5e7eb] text-black rounded-md text-sm hover:bg-gray-600 hover:text-white">
-            Login
+          <Link to="/login" className="text-sm text-gray-700">
+            LOGIN
           </Link>
         )}
         
-        <img onClick={() => setShowSearch(true)} src={assets.search_icon} alt="Search" className='w-5 cursor-pointer' />
-        <Link to="/cart" className="relative">
-          <img src={assets.cart_icon} className="w-5 cursor-pointer" alt="Cart" />
-          <p className="absolute right-[-5px] bottom-[-5px] w-4 text-center leading-4 bg-black text-white aspect-square rounded-full text-[8px]">
-            {getCartCount()}
-          </p>
+        <div className='cursor-pointer relative' onClick={() => setShowSearch(true)}>
+          <i className="fa-solid fa-magnifying-glass"></i>
+        </div>
+        
+        <Link to="/cart" className='cursor-pointer relative'>
+          <i className="fa-solid fa-cart-shopping"></i>
+          {getCartCount() > 0 && (
+            <div className="absolute -top-2 -right-2 w-5 h-5 rounded-full bg-red-500 flex items-center justify-center">
+              <p className="text-white text-xs">{getCartCount()}</p>
+            </div>
+          )}
         </Link>
-        <img onClick={() => setVisible(true)} src={assets.menu_icon} className="w-5 cursor-pointer" alt="Menu" />
-      </div>
-
-      {/* Sidebar menu for smaller screens */}
-      <div className={`absolute top-0 right-0 bottom-0 overflow-hidden bg-white transition-all ${visible ? 'w-full' : 'w-0'}`}>
-        <div className='flex flex-col text-gray-600'>
-          <div onClick={() => setVisible(false)} className='flex items-center gap-4 p-2'>
-            <img src={assets.dropdown_icon} className="h-4 rotate-180" alt="Back" />
-            <p>Back</p>
-          </div>
-          {['HOME', 'COLLECTION', 'ABOUT', 'CONTACT'].map((item) => (
-            <NavLink key={item} onClick={() => setVisible(false)} className="py-2 pl-6 border" to={`/${item.toLowerCase()}`}>{item}</NavLink>
-          ))}
+        
+        <div className='sm:hidden cursor-pointer' onClick={() => setVisible(!visible)}>
+          <i className="fa-solid fa-bars"></i>
         </div>
       </div>
+      
+      {visible && (
+        <div className='sm:hidden absolute left-0 top-full w-full bg-white shadow-md z-40 p-4'>
+          <ul className='flex flex-col gap-2'>
+            {['HOME', 'COLLECTION', 'ABOUT', 'CONTACT'].map((item) => (
+              <NavLink key={item} to={`/${item === "HOME" ? "" : item.toLowerCase()}`} className="text-gray-700 py-2" onClick={() => setVisible(false)}>
+                {item}
+              </NavLink>
+            ))}
+          </ul>
+        </div>
+      )}
     </div>
   );
 };

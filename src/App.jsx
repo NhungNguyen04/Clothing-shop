@@ -25,25 +25,25 @@ import SellerList from './pages/Admin/components/SellerList';
 import OrderList from './pages/Admin/OrderList';
 import Invoice from './pages/Admin/Invoice';
 import Transactions from './pages/Admin/Transactions';
+import { useAuth } from './context/AuthContext';
+import Profile from './pages/Profile';
+import TrackOrder from './pages/TrackOrder';
+import OrderSuccess from './pages/OrderSuccess';
+import SellerProfile from './pages/Admin/SellerProfile';
 import AccountPage from './pages/Admin/Accounts';
 import Reviews from './pages/Admin/Reviews';
-import useAuth from './hooks/useAuth';
+import AdminSettings from './pages/Admin/Settings';
 import Seller from './pages/Seller/Seller';
-import SellerProfile from './pages/Admin/SellerProfile';
-import Profile from './pages/Profile';
 import SellerDashboard from './pages/Seller/SellerDashboard';
-import TrackOrder from './pages/TrackOrder';
 import SellerTransactions from './pages/Seller/Transactions';
-import OrderSuccess from './pages/OrderSuccess';
+import SellerSettings from './pages/Seller/Settings';
 import GeminiChatbot from './components/GeminiChatbot';
-import AdminSettings from "./pages/Admin/Settings";
-import SellerSettings from "./pages/Seller/Settings";
 
 function App() {
   const location = useLocation();
   const isAdminRoute = location.pathname.startsWith('/admin');
   const isSellerRoute = location.pathname.startsWith('/seller');
-  const {user} = useAuth()
+  const { user, isAdmin, isSeller } = useAuth()
 
   console.log("User state in App.jsx:", user);
 
@@ -72,25 +72,26 @@ function App() {
         <Route path="/order-success" element={<OrderSuccess />} />
 
         {/* Admin Routes */}
-        <Route path="/admin/dashboard" element={<Dashboard />} />
-        <Route path="/admin/category" element={<CategoryPage />} />
-        <Route path="/admin/seller-list" element={<SellerList />} />
-        <Route path="/admin/seller-profile/:id" element={<SellerProfile/>} />
-        <Route path="/admin/invoice" element={<Invoice />} />
-        <Route path="/admin/transactions" element={<Transactions />} />
-        <Route path="/admin/seller-accounts" element={<AccountPage type="seller" />} />
-        <Route path="/admin/customer-accounts" element={<AccountPage type="customer" />} />
-        <Route path="/admin/admin-accounts" element={<AccountPage type="admin" />} />
-        <Route path="/admin/reviews" element={<Reviews />} />
-        <Route path="/admin/settings" element={<AdminSettings />} />
+        <Route path="/admin/dashboard" element={isAdmin ? <Dashboard /> : <Navigate to="/" />} />
+        <Route path="/admin/category" element={isAdmin ? <CategoryPage /> : <Navigate to="/" />} />
+        <Route path="/admin/seller-list" element={isAdmin ? <SellerList /> : <Navigate to="/" />} />
+        <Route path="/admin/seller-profile/:id" element={isAdmin ? <SellerProfile/> : <Navigate to="/" />} />
+        <Route path="/admin/invoice" element={isAdmin ? <Invoice /> : <Navigate to="/" />} />
+        <Route path="/admin/transactions" element={isAdmin ? <Transactions /> : <Navigate to="/" />} />
+        <Route path="/admin/seller-accounts" element={isAdmin ? <AccountPage type="seller" /> : <Navigate to="/" />} />
+        <Route path="/admin/customer-accounts" element={isAdmin ? <AccountPage type="customer" /> : <Navigate to="/" />} />
+        <Route path="/admin/admin-accounts" element={isAdmin ? <AccountPage type="admin" /> : <Navigate to="/" />} />
+        <Route path="/admin/reviews" element={isAdmin ? <Reviews /> : <Navigate to="/" />} />
+        <Route path="/admin/settings" element={isAdmin ? <AdminSettings /> : <Navigate to="/" />} />
 
-        <Route path="/seller" element={<Seller />} />
-        <Route path="/seller/products" element={<ProductList />} />
-        <Route path="/seller/orders" element={<OrderList />} />
-        <Route path="/seller/reviews" element={<Reviews />} />
-        <Route path="/seller/dashboard" element={<SellerDashboard />} />
-        <Route path="/seller/transactions" element={<SellerTransactions />} />
-        <Route path="/seller/settings" element={<SellerSettings />} />
+        {/* Seller Routes */}
+        <Route path="/seller" element={isSeller ? <Seller /> : <Navigate to="/" />} />
+        <Route path="/seller/products" element={isSeller ? <ProductList /> : <Navigate to="/" />} />
+        <Route path="/seller/orders" element={isSeller ? <OrderList /> : <Navigate to="/" />} />
+        <Route path="/seller/reviews" element={isSeller ? <Reviews /> : <Navigate to="/" />} />
+        <Route path="/seller/dashboard" element={isSeller ? <SellerDashboard /> : <Navigate to="/" />} />
+        <Route path="/seller/transactions" element={isSeller ? <SellerTransactions /> : <Navigate to="/" />} />
+        <Route path="/seller/settings" element={isSeller ? <SellerSettings /> : <Navigate to="/" />} />
 
       </Routes>
       {(!isAdminRoute && !isSellerRoute) && <Footer />}
