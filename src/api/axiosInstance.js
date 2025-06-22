@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const API_BASE_URL = "https://clothing-shop-be-5eol.onrender.com";
+const API_BASE_URL = "http://localhost:3300";
 
 const axiosInstance = axios.create({
   baseURL: API_BASE_URL,
