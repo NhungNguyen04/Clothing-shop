@@ -32,25 +32,26 @@ const DeliveryInformation = ({ deliveryInfo, onDeliveryChange, onLocationChange 
     setWards([]);
     
     const province = provinces.find((p) => p.code === Number(provinceCode));
-    setDistricts(province ? province.districts : []);
-
-    const newData = { ...tempData, province: province?.name || "" };
+    setDistricts(province ? province.districts : []);    const provinceName = province?.name || "";
+    const newData = { ...tempData, province: provinceName };
     setTempData(newData);
+    // Directly update the province field in parent component
+    onDeliveryChange("province", provinceName);
     updateAddress(newData);
   };
 
   const handleDistrictChange = (e) => {
     const districtCode = e.target.value;
-    setSelectedDistrict(districtCode);
-
-    const district = districts.find((d) => d.code === Number(districtCode));
+    setSelectedDistrict(districtCode);    const district = districts.find((d) => d.code === Number(districtCode));
     setWards(district ? district.wards : []);
 
-    const newData = { ...tempData, district: district?.name || "" };
+    const districtName = district?.name || "";
+    const newData = { ...tempData, district: districtName };
     setTempData(newData);
+    // Directly update the district field in parent component
+    onDeliveryChange("district", districtName);
     updateAddress(newData);
-  };
-  const handleWardChange = (e) => {
+  };  const handleWardChange = (e) => {
     const wardCode = e.target.value;
     const ward = wards.find((w) => w.code === Number(wardCode))?.name || "";
     onDeliveryChange("ward", ward);
@@ -58,6 +59,14 @@ const DeliveryInformation = ({ deliveryInfo, onDeliveryChange, onLocationChange 
     const newData = { ...tempData, ward };
     setTempData(newData);
     updateAddress(newData);
+    
+    // Make sure district and province are also updated
+    if (tempData.district) {
+      onDeliveryChange("district", tempData.district);
+    }
+    if (tempData.province) {
+      onDeliveryChange("province", tempData.province);
+    }
   };
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -73,30 +82,9 @@ const DeliveryInformation = ({ deliveryInfo, onDeliveryChange, onLocationChange 
       onDeliveryChange("postalCode", value);
     }
   };
-
   return (
     <div>
-      <h2 className="text-lg border-b pb-2 text-[#171717]">Your Information</h2>
       <form className="space-y-4">
-        {/* Full Name */}
-        <input
-          type="text"
-          name="name"
-          value={deliveryInfo.name || ""}
-          onChange={handleInputChange}
-          placeholder="Full Name"
-          className="w-full p-3 border rounded-lg"
-        />
-
-        {/* Email */}
-        <input
-          type="email"
-          name="email"
-          value={deliveryInfo.email || ""}
-          onChange={handleInputChange}
-          placeholder="Email"
-          className="w-full p-3 border rounded-lg"
-        />
 
         {/* Phone Number */}
         <input

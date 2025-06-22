@@ -28,6 +28,7 @@ import Profile from './pages/Profile';
 import TrackOrder from './pages/TrackOrder';
 import OrderSuccess from './pages/OrderSuccess';
 import SellerProfile from './pages/Admin/SellerProfile';
+import PaymentSuccess from './pages/PaymentSuccess';
 import AccountPage from './pages/Admin/Accounts';
 import Reviews from './pages/Admin/Reviews';
 import AdminSettings from './pages/Admin/Settings';
@@ -68,8 +69,9 @@ function App() {
         <Route path="/auth-success" element={<AuthSuccess />} />
         <Route path="/auth-error" element={<AuthError />} />
         <Route path="/order-success" element={<OrderSuccess />} />
-        <Route path="/seller/:id" element={<SellerPage />} />
-        <Route path="/seller-register" element={<SellerRegister/>} />
+        <Route path="/seller/:id" element={<SellerPage />} />        <Route path="/seller-register" element={<SellerRegister/>} />
+        <Route path="/payment/success" element={<PaymentSuccess />} />
+        <Route path="/payment/failure" element={<PaymentSuccess />} />
 
         {/* Admin Routes */}
         <Route path="/admin/dashboard" element={isAdmin ? <Dashboard /> : <Navigate to="/" />} />

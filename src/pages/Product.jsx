@@ -1,14 +1,14 @@
-import { useEffect, useState, useCallback, useContext } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import RelatedProducts from '../components/RelatedProducts';
 import axiosInstance from '../api/axiosInstance';
 import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-import { ShopContext } from '../context/ShopContext';
 import { FaStar, FaStarHalfAlt, FaRegStar, FaUpload, FaTimes, FaExpand, FaHeart, FaShare, FaShoppingCart, FaBolt } from 'react-icons/fa';
 import { BiImageAdd } from 'react-icons/bi';
 import { MdVerified } from 'react-icons/md';
-import useAuth from '../hooks/useAuth';
+import { useAuthStore } from '../store/AuthStore';
+import { useCartStore } from '../store/CartStore';
 import Spinner from '../components/Spinner';
 import { fetchProductById } from '../services/product';
 import { createReviewApi, updateReviewApi, deleteReviewApi, getReviewsByProduct } from '../services/review';
@@ -16,7 +16,6 @@ import { createReviewApi, updateReviewApi, deleteReviewApi, getReviewsByProduct 
 const Product = () => {
   const { productId } = useParams();
   const navigate = useNavigate();
-  const { addToCart } = useContext(ShopContext);
   const [productData, setProductData] = useState(null);
   const [image, setImage] = useState('');
   const [size, setSize] = useState('');
@@ -27,7 +26,8 @@ const Product = () => {
   const [reviewImages, setReviewImages] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [loading, setLoading] = useState(false);
-  const {user} = useAuth();
+  const { user } = useAuthStore();
+  const { addToCart } = useCartStore();
   const [reviews, setReviews] = useState([]);
   const [addingToCart, setAddingToCart] = useState(false);
   const [submittingReview, setSubmittingReview] = useState(false);
@@ -149,7 +149,6 @@ const Product = () => {
   }
 
   const totalPrice = (productData.price * quantity).toFixed(2);
-
   const handleAddToCart = async () => {
     if (!size) {
       toast.error('Please select a size before adding to cart.');
@@ -170,15 +169,9 @@ const Product = () => {
     }
     setAddingToCart(true);
     try {
-      await axiosInstance.post(`/cart/${user.id}`, {
-        productId: String(productId),
-        size,
-        quantity,
-        price: productData.price,
-        sellerId: productData.sellerId
-      });
-    setQuantity(1);
-    toast.success("Product added to cart!");
+      await addToCart(productId, size, quantity);
+      setQuantity(1);
+      toast.success("Product added to cart!");
     } catch (error) {
       toast.error("Failed to add product to cart.");
       console.error(error);

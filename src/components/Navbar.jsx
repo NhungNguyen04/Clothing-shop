@@ -1,19 +1,38 @@
-import { useContext, useState } from 'react';
+import { useState, useEffect } from 'react';
 import { assets } from '@/assets/assets';
 import { Link, NavLink, useNavigate } from 'react-router-dom';
-import { ShopContext } from '../context/ShopContext';
 import { useAuth } from '../context/AuthContext';
 import { useAuthStore } from '../store/AuthStore';
+import { useCartStore } from '../store/CartStore';
 import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import { BiCart } from 'react-icons/bi';
 
 const Navbar = () => {
   const [visible, setVisible] = useState(false);
   const [dropdownOpen, setDropdownOpen] = useState(false);
-  const { setShowSearch, getCartCount } = useContext(ShopContext);
+  const [showSearch, setShowSearch] = useState(false);
+  const [cartItemCount, setCartItemCount] = useState(0);
   const {logout } = useAuth();
   const { user, isSeller, isAdmin, seller } = useAuthStore();
+  const { cart, getUserCart } = useCartStore();
   const navigate = useNavigate();
+  
+  useEffect(() => {
+    // Fetch cart when component mounts and user is available
+    if (user?.id) {
+      getUserCart();
+    }
+  }, [user, getUserCart]);
+
+  useEffect(() => {
+    // Update cart count whenever cart changes
+    if (cart && cart.cartItems) {
+      setCartItemCount(cart.cartItems.length);
+    } else {
+      setCartItemCount(0);
+    }
+  }, [cart]);
   
   const handleLogout = () => {
     logout();
@@ -107,10 +126,10 @@ const Navbar = () => {
         </div>
         
         <Link to="/cart" className='cursor-pointer relative'>
-          <i className="fa-solid fa-cart-shopping"></i>
-          {getCartCount() > 0 && (
+          <BiCart className='text-3xl text-gray-700' />
+          {cartItemCount > 0 && (
             <div className="absolute -top-2 -right-2 w-5 h-5 rounded-full bg-red-500 flex items-center justify-center">
-              <p className="text-white text-xs">{getCartCount()}</p>
+              <p className="text-white text-xs">{cartItemCount}</p>
             </div>
           )}
         </Link>

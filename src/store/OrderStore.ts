@@ -23,8 +23,8 @@ interface OrderState {
     address: string,
     phoneNumber: string,
     postalCode?: string,
-    paymentMethod?: 'COD' | 'VIETQR'
-  ) => Promise<boolean>;
+    paymentMethod?: 'COD' | 'VIETQR' | 'VNPAY'
+  ) => Promise<ApiResponse<Order[]>>;
   
   // Update order status
   updateOrderStatus: (orderId: string, status: OrderStatus) => Promise<boolean>;
@@ -97,13 +97,17 @@ export const useOrderStore = create<OrderState>((set, get) => ({
       return null;
     }
   },
-  
-  checkoutCart: async (
+    checkoutCart: async (
     address: string,
     phoneNumber: string,
     postalCode?: string,
-    paymentMethod: 'COD' | 'VIETQR' = 'COD'
-  ): Promise<boolean> => {
+    paymentMethod: 'COD' | 'VIETQR' | 'VNPAY' = 'COD'
+  ): Promise<ApiResponse<Order[]>> => {
+    console.log('Starting checkout process...');
+    console.log('Address:', address);
+    console.log('Phone Number:', phoneNumber);
+    console.log('Postal Code:', postalCode);
+    console.log('Payment Method:', paymentMethod);
     set({ isLoading: true, error: null });
     
     try {
@@ -112,12 +116,22 @@ export const useOrderStore = create<OrderState>((set, get) => ({
       
       if (!authStore.user) {
         set({ error: 'User not authenticated', isLoading: false });
-        return false;
+        return {
+          success: false,
+          message: 'User not authenticated',
+          error: 'User not authenticated',
+          data: null
+        };
       }
       
       if (!cartStore.cart) {
         set({ error: 'Cart is empty', isLoading: false });
-        return false;
+        return {
+          success: false,
+          message: 'Cart is empty',
+          error: 'Cart is empty',
+          data: null
+        };
       }
       
       // Get selected item IDs
@@ -125,7 +139,12 @@ export const useOrderStore = create<OrderState>((set, get) => ({
       
       if (selectedItemIds.length === 0) {
         set({ error: 'No items selected for checkout', isLoading: false });
-        return false;
+        return {
+          success: false,
+          message: 'No items selected for checkout',
+          error: 'No items selected for checkout',
+          data: null
+        };
       }
 
       // Create checkout data using CartToOrderInput format
@@ -145,20 +164,29 @@ export const useOrderStore = create<OrderState>((set, get) => ({
         // Refresh orders
         await get().fetchUserOrders();
         set({ isLoading: false });
-        return true;
       } else {
         set({ 
           error: response.message || 'Checkout failed', 
           isLoading: false
         });
-        return false;
       }
+      
+      // Return the full API response
+      return response;
     } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Checkout failed';
       set({ 
-        error: error instanceof Error ? error.message : 'Checkout failed',
+        error: errorMessage,
         isLoading: false 
       });
-      return false;
+      
+      // Return a structured error response
+      return {
+        success: false,
+        message: errorMessage,
+        error: error,
+        data: null
+      };
     }
   },
   

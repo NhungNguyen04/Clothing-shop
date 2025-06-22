@@ -35,7 +35,7 @@ export interface CreateOrderInput {
   phoneNumber: string;
   address: string;
   postalCode?: string;
-  paymentMethod: 'COD' | 'VIETQR';
+  paymentMethod: 'COD' | 'VIETQR' | 'VNPAY';
   orderItems: OrderItem[];
 }
 
@@ -48,7 +48,7 @@ export interface CartToOrderInput {
   phoneNumber: string;
   address: string;
   postalCode?: string;
-  paymentMethod: 'COD' | 'VIETQR';
+  paymentMethod: 'COD' | 'VIETQR' | 'VNPAY';
   selectedCartItemIds: string[];
 }
 
@@ -99,7 +99,7 @@ export interface Order {
   phoneNumber: string;
   address: string;
   postalCode?: string;
-  paymentMethod: 'COD' | 'VIETQR';
+  paymentMethod: 'COD' | 'VIETQR' | 'VNPAY';
   totalPrice: number;
   status: OrderStatus;
   paymentStatus: PaymentStatus;
