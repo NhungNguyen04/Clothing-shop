@@ -1,6 +1,5 @@
 import PropTypes from "prop-types";
 import { createContext, useEffect, useState } from "react";
-import { products } from "../assets/assets";
 import { toast } from "react-toastify";
 
 // eslint-disable-next-line react-refresh/only-export-components
@@ -63,7 +62,6 @@ const ShopContextProvider = (props) => {
   };
 
   const value = {
-    products,
     currency,
     delivery_fee,
     search,
