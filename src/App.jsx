@@ -13,6 +13,7 @@ import 'react-toastify/dist/ReactToastify.css';
 import { ToastContainer } from 'react-toastify';
 import TryOn from './pages/TryOn';
 import CheckOut from './pages/CheckOut';
+import DirectCheckOut from './pages/DirectCheckOut';
 import Register from './pages/Register';
 import AuthSuccess from './pages/AuthSuccess';
 import AuthError from './pages/AuthError';
@@ -29,6 +30,7 @@ import TrackOrder from './pages/TrackOrder';
 import OrderSuccess from './pages/OrderSuccess';
 import SellerProfile from './pages/Admin/SellerProfile';
 import PaymentSuccess from './pages/PaymentSuccess';
+import PaymentFailure from './pages/PaymentFailure';
 import AccountPage from './pages/Admin/Accounts';
 import Reviews from './pages/Admin/Reviews';
 import AdminSettings from './pages/Admin/Settings';
@@ -56,10 +58,10 @@ function App() {
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/profile" element={<Profile />} />
-        <Route path="/collection" element={<Collection />} />
-        <Route path="/product/:productId" element={<Product />} />
+        <Route path="/collection" element={<Collection />} />        <Route path="/product/:productId" element={<Product />} />
         <Route path="/cart" element={<Cart />} />
         <Route path="/check-out/:cartId" element={<CheckOut />} />
+        <Route path="/direct-checkout/:productId" element={<DirectCheckOut />} />
         <Route path="/login" element={user ? <Navigate to="/" /> : <Login />} />
         <Route path="/register" element={<Register />} />
         <Route path="/place-order" element={<PlaceOrder />} />
@@ -69,9 +71,10 @@ function App() {
         <Route path="/auth-success" element={<AuthSuccess />} />
         <Route path="/auth-error" element={<AuthError />} />
         <Route path="/order-success" element={<OrderSuccess />} />
-        <Route path="/seller/:id" element={<SellerPage />} />        <Route path="/seller-register" element={<SellerRegister/>} />
-        <Route path="/payment/success" element={<PaymentSuccess />} />
-        <Route path="/payment/failure" element={<PaymentSuccess />} />
+        <Route path="/seller/:id" element={<SellerPage />} />        
+        <Route path="/seller-register" element={<SellerRegister/>} />        
+        <Route path="/payment-success" element={<PaymentSuccess />} />
+        <Route path="/payment-failure" element={<PaymentFailure />} />
 
         {/* Admin Routes */}
         <Route path="/admin/dashboard" element={isAdmin ? <Dashboard /> : <Navigate to="/" />} />

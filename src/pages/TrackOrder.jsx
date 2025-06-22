@@ -2,6 +2,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import Spinner from '../components/Spinner';
 import { OrderService } from '../services/order';
+import paymentService from '../services/payment';
 import { toast } from 'react-toastify';
 
 const TrackOrder = () => {
@@ -176,10 +177,36 @@ const TrackOrder = () => {
         <div className="font-bold">Total paid by customer: ${(order.orderItems.reduce((sum, item) => sum + Number(item.totalPrice), 0) + 10).toFixed(2)}</div>
       </div>      <div className="mb-6">
         <div className="font-semibold mb-2">Customer Information</div>
-        <div>Name: {order.customerName || order.user?.firstName + ' ' + order.user?.lastName || 'N/A'}</div>
+        <div>Name: {order.customerName || order.user?.firstName + ' ' + order.user?.lastName || order.user?.name || 'N/A'}</div>
         <div>Phone: {order.phoneNumber}</div>
-        <div>Address: {order.address}</div>
-        <div>Payment: {order.paymentMethod}</div>
+        <div>Address: {order.address || 'Not provided'}</div>
+        <div className="flex items-center gap-2">
+          <span>Payment: {order.paymentMethod}</span>
+          <span className={`px-2 py-1 rounded text-xs ${
+            order.paymentStatus === 'SUCCESS' ? 'bg-green-100 text-green-800' : 
+            order.paymentStatus === 'PENDING' ? 'bg-yellow-100 text-yellow-800' : 'bg-gray-100'
+          }`}>
+            {order.paymentStatus}
+          </span>
+          
+          {order.paymentMethod === 'VNPAY' && order.paymentStatus === 'PENDING' && (
+            <button 
+              onClick={async () => {
+                try {
+                  setLoading(true);
+                  const paymentUrl = await paymentService.createVnpayPayment(order.id);
+                  window.location.href = paymentUrl;
+                } catch (error) {
+                  toast.error('Failed to initiate payment');
+                  setLoading(false);
+                }
+              }} 
+              className="ml-2 px-3 py-1 bg-blue-600 text-white rounded text-xs hover:bg-blue-700"
+            >
+              Complete Payment
+            </button>
+          )}
+        </div>
       </div>
       
       {order.shipment && (

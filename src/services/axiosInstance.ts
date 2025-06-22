@@ -1,8 +1,8 @@
 import axios from "axios";
 
 const getBaseUrl = () => {
-  // return 'http://localhost:3300';
-  return 'https://clothing-shop-be-5eol.onrender.com';
+  return import.meta.env.VITE_API_URL || "http://localhost:3300";
+
 };
 
 const axiosInstance = axios.create({

@@ -56,13 +56,17 @@ const CheckOut = () => {
         // If returning from VNPAY with query parameters
         if (vnp_ResponseCode && vnp_OrderInfo) {
             const paymentOrderId = vnp_OrderInfo.split('_').pop(); // Extract order ID from order info
-            
-            // Check if payment was successful
+              // Check if payment was successful
             if (vnp_ResponseCode === '00' && vnp_TransactionStatus === '00') {
                 // Payment successful
-                navigate(`/payment-success?orderId=${paymentOrderId}`);
-            } else {
+                navigate(`/payment-success?orderId=${paymentOrderId}`);            } else {
                 // Payment failed
+                const errorMessage = paymentService.getVnpayErrorMessage(vnp_ResponseCode);
+                paymentService.handlePaymentFailure(navigate, {
+                    message: errorMessage,
+                    orderId: paymentOrderId,
+                    errorCode: vnp_ResponseCode
+                });
                 navigate(`/payment-success?message=Payment failed with code: ${vnp_ResponseCode}`);
             }
         }
@@ -113,7 +117,7 @@ const CheckOut = () => {
                     
                     setDeliveryInfo({
                         phoneNumber: defaultAddress.phoneNumber || "",
-                        address: defaultAddress.fullAddress || "",
+                        address: defaultAddress.address || "",
                         street: defaultAddress.street || "",
                         ward: ward,
                         district: district,
@@ -194,13 +198,13 @@ const CheckOut = () => {
             toast.error('Your cart is empty');
             return;
         }
-        
-        try {
-            setIsLoading(true);            
+          try {
+            setIsLoading(true);
+            
             // Combine address fields into a single string
             const combinedAddress = showNewAddressForm 
                 ? `${deliveryInfo.street}, ${deliveryInfo.ward}, ${deliveryInfo.district}, ${deliveryInfo.province}`
-                : deliveryInfo.address;
+                : (deliveryInfo.address || `${deliveryInfo.street}, ${deliveryInfo.ward}, ${deliveryInfo.district}, ${deliveryInfo.province}`);
             
             // If creating a new address, save it first
             if (showNewAddressForm && saveNewAddress) {
@@ -210,12 +214,9 @@ const CheckOut = () => {
                     console.error('Error saving address:', error);
                     // Continue with order placement even if address save fails
                 }
-            }
-
-            console.log('paymentMethod:', paymentMethod);                try {
-                // Create order regardless of payment method
+            }            console.log('paymentMethod:', paymentMethod);                try {                // Create order regardless of payment method
                 const orderRes = await checkoutCart(
-                    combinedAddress,
+                    combinedAddress, // Using the combined address with fallbacks
                     deliveryInfo.phoneNumber,
                     deliveryInfo.postalCode,
                     paymentMethod.toUpperCase(),
@@ -272,8 +273,7 @@ const CheckOut = () => {
                     setIsLoading(false);                } else if (paymentMethod === 'vnpay') {
                     setRedirectingToPayment(true);
                     
-                    try {
-                        // Debug the order ID
+                    try {                        // Debug the order ID
                         console.log('Using order ID for payment:', orderId);
                         
                         // Ensure we have a valid order ID before proceeding
@@ -288,14 +288,20 @@ const CheckOut = () => {
                             throw new Error('Invalid payment URL received');
                         }
                         
-                        // Redirect to VNPAY payment gateway
+                        // Redirect to VNPAY payment gateway - use window.location.href for full page redirect
+                        // This is important for proper redirect flow with VNPAY
                         console.log('Redirecting to VNPAY:', paymentUrl);
-                        window.location.href = paymentUrl;
-                    } catch (paymentError) {
+                        window.location.href = paymentUrl;                    } catch (paymentError) {
                         console.error('VNPAY payment error:', paymentError);
-                        toast.error('Failed to initiate VNPAY payment. Please try again or choose another payment method.');
                         setIsLoading(false);
                         setRedirectingToPayment(false);
+                        
+                        // Use the payment failure component for a better user experience
+                        paymentService.handlePaymentFailure(navigate, {
+                            message: 'Failed to initiate payment. Please try again or choose another payment method.',
+                            orderId: orderId,
+                            errorCode: 'INIT_ERROR'
+                        });
                     }
                 }
             } catch (orderError) {

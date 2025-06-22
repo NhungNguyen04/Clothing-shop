@@ -458,16 +458,25 @@ const Product = () => {
                   <FaShoppingCart />
                   {addingToCart ? 'Adding...' : 'Add to Cart'}
             </button>
-                
-                <Link 
-                  to={`/check-out/${productId}?size=${size}&quantity=${quantity}`}
-                  className="flex-1"
-                >
-                  <button className="w-full bg-orange-500 hover:bg-orange-600 text-white font-semibold py-3 px-6 rounded-lg transition-colors flex items-center justify-center gap-2">
+                  {size ? (
+                  <Link 
+                    to={`/direct-checkout/${productId}?size=${size}&quantity=${quantity}`}
+                    className="flex-1"
+                  >
+                    <button className="w-full bg-orange-500 hover:bg-orange-600 text-white font-semibold py-3 px-6 rounded-lg transition-colors flex items-center justify-center gap-2">
+                      <FaBolt />
+                      Buy Now
+                    </button>
+                  </Link>
+                ) : (
+                  <button 
+                    className="flex-1 bg-orange-500 opacity-50 cursor-not-allowed text-white font-semibold py-3 px-6 rounded-lg flex items-center justify-center gap-2"
+                    disabled
+                  >
                     <FaBolt />
                     Buy Now
-              </button>
-            </Link>
+                  </button>
+                )}
                 
                 <button 
                   className={`p-3 border-2 rounded-lg transition-colors ${
