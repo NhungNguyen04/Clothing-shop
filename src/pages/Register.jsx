@@ -1,11 +1,15 @@
 import { useForm } from "react-hook-form";
 import { useState } from "react";
 import { toast } from "react-toastify";
+import { useNavigate } from "react-router-dom";
 import axiosInstance from "../api/axiosInstance";
+import { useAuth } from "../context/AuthContext";
 
 const Register = () => {
   const { register, handleSubmit, formState: { errors } } = useForm();
   const [loading, setLoading] = useState(false);
+  const navigate = useNavigate();
+  const { login } = useAuth();
 
   const onSubmit = async (data) => {
     setLoading(true);
@@ -13,6 +17,23 @@ const Register = () => {
       const response = await axiosInstance.post("/users", data);
       toast.success("Đăng ký tài khoản thành công");
       console.log("Registration successful:", response.data.data);
+      
+      // After successful registration, attempt to login
+      try {
+        const loginResponse = await axiosInstance.post("/auth/login", {
+          email: data.email,
+          password: data.password
+        });
+        
+        // Use the login function from context
+        await login(loginResponse.data);
+        
+        navigate("/");
+      } catch (loginError) {
+        console.error("Auto-login failed:", loginError);
+        // Redirect to login page if auto-login fails
+        navigate("/login");
+      }
     } catch (error) {
       toast.error("Đăng ký thất bại. Vui lòng thử lại!");
       console.error("Registration failed:", error.response?.data || error.message);

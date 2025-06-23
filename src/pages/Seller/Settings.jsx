@@ -3,7 +3,7 @@ import AdminLayout from "../Admin/components/AdminLayout";
 import useAuth from '../../hooks/useAuth';
 import axiosInstance from '../../api/axiosInstance';
 import Spinner from '../../components/Spinner';
-import { toast, ToastContainer } from 'react-toastify';
+import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
 export default function SellerSettings() {
@@ -141,7 +141,6 @@ export default function SellerSettings() {
 
   return (
     <AdminLayout>
-      <ToastContainer />
       <div className="max-w-3xl mx-auto bg-white rounded-lg shadow p-6 mt-8">
         <h1 className="text-2xl font-bold mb-6">Seller Settings</h1>
         <div className="flex border-b mb-6">

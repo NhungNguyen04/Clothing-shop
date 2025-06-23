@@ -104,7 +104,7 @@ const GeminiChatbot = () => {
       {!open && (
         <button
           onClick={() => setOpen(true)}
-          className="bg-green-600 p-3 rounded-full shadow-lg hover:bg-green-700 transition"
+          className="bg-pink-600 p-3 rounded-full shadow-lg hover:bg-pink-700 transition"
           title="Chat với Gemini"
         >
           <svg width="28" height="28" fill="white" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.03 2 11c0 2.39 1.05 4.55 2.82 6.22L4 22l4.97-1.32C10.62 20.9 11.3 21 12 21c5.52 0 10-4.03 10-9s-4.48-9-10-9zm0 16c-.62 0-1.23-.07-1.82-.2l-.39-.09-2.96.79.79-2.89-.26-.27C5.09 14.13 4 12.65 4 11c0-3.86 3.58-7 8-7s8 3.14 8 7-3.58 7-8 7z"/></svg>
@@ -113,24 +113,24 @@ const GeminiChatbot = () => {
       {open && (
         <div className="w-80 bg-white rounded-lg shadow-2xl flex flex-col" style={{ minHeight: 420 }}>
           <div className="flex items-center justify-between p-3 border-b">
-            <span className="font-bold text-green-700">Trợ lý gợi ý sản phẩm</span>
+            <span className="font-bold text-pink-700">Trợ lý gợi ý sản phẩm</span>
             <button onClick={() => setOpen(false)} className="text-gray-500 hover:text-red-500 text-xl">×</button>
           </div>
           <div className="flex-1 overflow-y-auto p-3 space-y-2" style={{ maxHeight: 300 }}>
             {messages.map((msg, idx) => (
               <div key={idx} className={msg.from === "bot" ? "text-left" : "text-right"}>
-                <span className={msg.from === "bot" ? "bg-green-100 text-green-800 px-3 py-2 rounded-lg inline-block" : "bg-gray-200 text-gray-800 px-3 py-2 rounded-lg inline-block"}>
+                <span className={msg.from === "bot" ? "bg-pink-100 text-pink-800 px-3 py-2 rounded-lg inline-block" : "bg-gray-200 text-gray-800 px-3 py-2 rounded-lg inline-block"}>
                   {renderMessageText(msg.text)}
                 </span>
               </div>
             ))}
-            {loading && <div className="text-green-600">Trợ lý đang trả lời...</div>}
+            {loading && <div className="text-pink-600">Trợ lý đang trả lời...</div>}
           </div>
           <div className="p-3 border-t flex gap-2">
             <input
               ref={inputRef}
               type="text"
-              className="flex-1 border rounded px-3 py-2 text-sm focus:outline-green-600"
+              className="flex-1 border rounded px-3 py-2 text-sm focus:outline-pink-600"
               placeholder="Bạn muốn gợi ý gì?"
               value={input}
               onChange={e => setInput(e.target.value)}
@@ -139,7 +139,7 @@ const GeminiChatbot = () => {
             />
             <button
               onClick={handleSend}
-              className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 transition text-sm"
+              className="bg-pink-600 text-white px-4 py-2 rounded hover:bg-pink-700 transition text-sm"
               disabled={loading || !input.trim()}
             >
               Gửi

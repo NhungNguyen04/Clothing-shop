@@ -8,10 +8,10 @@ function AuthError() {
   useEffect(() => {
     // Get error message from URL
     const params = new URLSearchParams(window.location.search);
-    const errorMessage = params.get('message') || 'Unknown error';
+    const errorMessage = params.get('error') || params.get('message') || 'Unknown error';
     
     // Show error message
-    toast.error(`Authentication failed: ${errorMessage}`);
+    toast.error(`Authentication failed: ${decodeURIComponent(errorMessage)}`);
     
     // Redirect to login page after a delay
     setTimeout(() => {
@@ -26,7 +26,7 @@ function AuthError() {
       <p className="text-gray-600 mb-4">Redirecting you to the login page...</p>
       <button 
         onClick={() => navigate('/login')} 
-        className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+        className="px-4 py-2 bg-pink-600 text-white rounded hover:bg-pink-700"
       >
         Go to Login
       </button>

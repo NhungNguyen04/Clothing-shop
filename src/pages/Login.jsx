@@ -4,20 +4,25 @@ import { toast } from "react-toastify";
 import { useNavigate } from "react-router-dom";
 import { FcGoogle } from "react-icons/fc";
 import axiosInstance from "../api/axiosInstance";
+import { useAuth } from "../context/AuthContext";
+import { AuthService } from "../services/oauth";
 
 const Login = () => {
   const { register, handleSubmit, formState: { errors } } = useForm();
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
+  const { login } = useAuth();
 
   const onSubmit = async (data) => {
     setLoading(true);
     try {
       const response = await axiosInstance.post("/auth/login", data);
       toast.success("Đăng nhập thành công");
-      localStorage.setItem("user", JSON.stringify(response.data.user));
+      
+      // Use the login function from AuthContext
+      await login(response.data);
+      
       navigate("/");
-      window.location.reload()
     } catch (error) {
       toast.error("Đăng nhập thất bại. Vui lòng thử lại!");
       console.error("Login failed:", error.response?.data || error.message);
@@ -26,8 +31,17 @@ const Login = () => {
     }
   };
 
-  const handleGoogleLogin = () => {
-    window.location.href = "http://localhost:3300/auth/google";
+  const handleGoogleLogin = async () => {
+    try {
+      const result = await AuthService.loginWithGoogle();
+      
+      if (!result.success) {
+        toast.error(result.error || "Failed to open Google login");
+      }
+    } catch (error) {
+      console.error('Google sign in error:', error);
+      toast.error('Failed to sign in with Google');
+    }
   };
 
   return (

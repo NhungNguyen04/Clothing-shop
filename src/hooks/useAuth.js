@@ -1,32 +1,10 @@
-import { useEffect, useState } from "react";
+// This file is maintained for backwards compatibility
+// New code should import from '../context/AuthContext' directly
+import { useAuth as newUseAuth } from '../context/AuthContext';
 
 const useAuth = () => {
-  const [user, setUser] = useState(null);
-
-  useEffect(() => {
-    const readUserFromLocalStorage = () => {
-      const storedUser = localStorage.getItem("user");
-      setUser(storedUser ? JSON.parse(storedUser) : null);
-    };
-
-    // Read initial user state
-    readUserFromLocalStorage();
-
-    // Listen for changes in localStorage from other tabs/windows
-    window.addEventListener("storage", readUserFromLocalStorage);
-
-    // Clean up the event listener
-    return () => {
-      window.removeEventListener("storage", readUserFromLocalStorage);
-    };
-  }, []); // Empty dependency array means this runs once on mount and cleans up on unmount
-
-  const logout = () => {
-    localStorage.removeItem("user");
-    setUser(null);
-  };
-
-  return { user, logout };
+  // Call the new hook from AuthContext
+  return newUseAuth();
 };
 
 export default useAuth;

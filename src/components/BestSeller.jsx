@@ -1,37 +1,30 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect } from 'react';
 import Title from './Title';
 import ProductItem from './ProductItem';
-import axiosInstance from '../api/axiosInstance';
+import { useProductStore } from '../store/ProductStore';
 
 const BestSeller = () => {
+  const { products, isLoading } = useProductStore();
   const [bestSeller, setBestSeller] = useState([]);
-
-  const fetchBestSellers = useCallback(async () => {
-    try {
-      const response = await axiosInstance.get('/products');
-      const bestProducts = response.data.data
-      const shuffled = bestProducts.sort(() => 0.5 - Math.random());
-      setBestSeller(shuffled.slice(0, 5));
-    } catch (error) {
-      console.error('Error fetching best sellers:', error);
-    }
-  }, []);
-
+  
   useEffect(() => {
-    fetchBestSellers();
-  }, [fetchBestSellers]);
+    if (products && products.length > 0) {
+      // Sort by highest average rating for best sellers
+      const topRated = [...products]
+        .sort((a, b) => b.averageRating - a.averageRating)
+        .slice(0, 5);
+      setBestSeller(topRated);
+    }
+  }, [products]);
   
   return (
     <div className='my-10'>
       <div className='text-center text-3xl py-8'>
         <Title text1={'BEST'} text2={'SELLERS'}/>
-        <p className='w-3/4 m-auto text-xs sm:text-sm md:text-base text-gray-600'>
-          Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla nec massa auctor.
-        </p>
-      </div>
-
-      <div className='grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 gap-y-6'>
-        {
+      </div>      <div className='grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 gap-y-6'>
+        {isLoading ? (
+          <div className="col-span-full text-center">Loading best sellers...</div>
+        ) : bestSeller && bestSeller.length > 0 ? (
           bestSeller.map((product) => (
             <ProductItem
               key={product.id}
@@ -39,9 +32,13 @@ const BestSeller = () => {
               image={product.image}
               name={product.name}
               price={product.price}
+              averageRating={product.averageRating}
+              reviews={product.reviews}
             />
           ))
-        }
+        ) : (
+          <div className="col-span-full text-center">No products found</div>
+        )}
       </div>
     </div>
   );

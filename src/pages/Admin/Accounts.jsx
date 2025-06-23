@@ -71,7 +71,7 @@ const AccountPage = ({ type }) => {
       <div className="p-6 bg-gray-100 min-h-screen">
         <div className="flex justify-between items-center mb-4">
           <h1 className="text-2xl font-semibold capitalize">{type} Accounts</h1>
-          <button className="bg-blue-600 text-white px-4 py-2 rounded-md flex items-center gap-2">
+          <button className="bg-pink-600 text-white px-4 py-2 rounded-md flex items-center gap-2">
             <FaPlus /> Create New
           </button>
         </div>
@@ -91,7 +91,7 @@ const AccountPage = ({ type }) => {
                 <tr key={account.id} className="border-t">
                   <td className="p-3">{(currentPage - 1) * itemsPerPage + index + 1}</td>
                   <td className="p-3 flex items-center gap-2">
-                    {type === "seller" && <FaUser className="text-blue-500" />}
+                    {type === "seller" && <FaUser className="text-pink-500" />}
                     {type === "customer" && <FaUsers className="text-green-500" />}
                     {type === "admin" && <FaUserShield className="text-red-500" />}
                     {account.name}

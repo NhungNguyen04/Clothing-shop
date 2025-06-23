@@ -116,7 +116,7 @@ const Reviews = () => {
                         <button
                             key={index}
                             onClick={() => handlePageChange(index + 1, rowsPerPage)}
-                            className={`px-3 py-1 ${currentPage === index + 1 ? 'bg-blue-500 text-white' : 'border'}`}
+                            className={`px-3 py-1 ${currentPage === index + 1 ? 'bg-pink-500 text-white' : 'border'}`}
                         >
                             {index + 1}
                         </button>

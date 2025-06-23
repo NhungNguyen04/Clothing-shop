@@ -1,46 +1,33 @@
-import { useState, useEffect, useCallback } from 'react';
 import Title from './Title';
 import ProductItem from './ProductItem';
-import axiosInstance from '../api/axiosInstance';
+import { useProductStore } from '../store/ProductStore';
 
 const LatestCollection = () => {
-  const [latestProducts, setLatestProducts] = useState([]);
-
-  const fetchProducts = useCallback(async () => {
-    try {
-      const response = await axiosInstance.get('/products');
-      setLatestProducts(response.data.data.slice(0, 10));
-    } catch (error) {
-      console.error('Error fetching products:', error);
-    }
-  }, []);
-
-  useEffect(() => {
-    fetchProducts();
-  }, [fetchProducts]);
+  const { recentProducts, isLoading } = useProductStore();
   
   return (
     <div className='my-10'>
       <div className='text-center py-8 text-3xl'>
         <Title text1={'LATEST'} text2={'COLLECTION'}></Title>
-        <p className='w-3/4 m-auto text-xs sm:text-sm md:text-base text-gray-600'>
-          Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla nec massa auctor.
-        </p>
-      </div>
-
-      {/* Rendering products */}
+      </div>      {/* Rendering products */}
       <div className='grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 gap-y-6'>
-        {
-          latestProducts.map((item) => (
+        {isLoading ? (
+          <div className="col-span-full text-center">Loading latest products...</div>
+        ) : recentProducts && recentProducts.length > 0 ? (
+          recentProducts.map((item) => (
             <ProductItem 
               key={item.id} 
               id={item.id} 
               image={item.image} 
               name={item.name} 
               price={item.price}
+              averageRating={item.averageRating}
+              reviews={item.reviews}
             />
           ))
-        }
+        ) : (
+          <div className="col-span-full text-center">No products found</div>
+        )}
       </div>
     </div>
   );

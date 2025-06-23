@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { FaHome, FaBox, FaShoppingCart, FaUsers, FaDollarSign, FaUser, FaStar, FaCog, FaBars } from "react-icons/fa";
+import { FaHome, FaBox, FaShoppingCart, FaUsers, FaDollarSign, FaUser, FaStar, FaCog, FaBars, FaComment } from "react-icons/fa";
 import { assets } from '@/assets/assets';
 import { Link, useLocation } from 'react-router-dom';
 import useAuth from "../../../hooks/useAuth";
@@ -20,6 +20,7 @@ const menuItems = {
     { name: "Dashboard", icon: <FaHome />, link: "/seller/dashboard" },
     { name: "Products", icon: <FaBox />, link: "/seller/products" },
     { name: "Orders", icon: <FaShoppingCart />, link: "/seller/orders" },
+    { name: "Chats", icon: <FaComment />, link: "/seller/chats" },
     { name: "Transactions", icon: <FaDollarSign />, link: "/seller/transactions" },
     { name: "Reviews", icon: <FaStar />, link: "/seller/reviews" },
   ]

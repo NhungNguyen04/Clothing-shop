@@ -106,7 +106,7 @@ const Reviews = () => {
                                 <tr key={review.id} className="border-b">
                                     <td className="p-3">{(currentPage - 1) * rowsPerPage + idx + 1}</td>
                                     <td className="p-3">
-                                        <button className="hover:text-blue-600" style={{ background: 'none', border: 'none', padding: 0, margin: 0, cursor: 'pointer' }} onClick={() => navigate(`/product/${review.productId}`)}>
+                                        <button className="hover:text-pink-600" style={{ background: 'none', border: 'none', padding: 0, margin: 0, cursor: 'pointer' }} onClick={() => navigate(`/product/${review.productId}`)}>
                                             {review.product.name}
                                         </button>
                                     </td>
@@ -131,7 +131,7 @@ const Reviews = () => {
                         <button
                             key={index}
                             onClick={() => handlePageChange(index + 1)}
-                            className={`px-3 py-1 ${currentPage === index + 1 ? 'bg-blue-500 text-white' : 'border'}`}
+                            className={`px-3 py-1 ${currentPage === index + 1 ? 'bg-pink-500 text-white' : 'border'}`}
                         >
                             {index + 1}
                         </button>

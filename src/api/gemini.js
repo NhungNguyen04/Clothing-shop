@@ -1,5 +1,5 @@
 export async function getGeminiSuggestion(prompt) {
-  const apiKey = "AIzaSyA6LH-hbGgj_GmH2faGTf3-Lb3KFKcp3yA";
+  const apiKey = import.meta.env.VITE_GEMINI_API_KEY;
   const url = "https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key=" + apiKey;
   const body = {
     contents: [{ parts: [{ text: prompt }] }]

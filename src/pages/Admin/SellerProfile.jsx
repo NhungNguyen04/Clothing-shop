@@ -55,7 +55,7 @@ const SellerProfile = () => {
     <AdminLayout>
       <div className="bg-gray-100 min-h-screen p-6">
         <div className="bg-white shadow-lg rounded-lg mx-auto">
-          <div className="relative bg-blue-600 h-36 flex justify-center items-center">
+          <div className="relative bg-pink-600 h-36 flex justify-center items-center">
             <img
               src={sellerData.user?.image || "https://wp.alithemes.com/html/evara/evara-backend/assets/imgs/brands/brand-3.jpg"}
               alt="Logo"
@@ -77,7 +77,7 @@ const SellerProfile = () => {
             <div className="p-4 border rounded-lg">
               <p className="text-md font-semibold">Contacts</p>
               <p className="text-gray-700">Manager: {sellerData.managerName}</p>
-              <p className="text-blue-600">{sellerData.user?.email}</p>
+              <p className="text-pink-600">{sellerData.user?.email}</p>
               <p className="text-gray-700">{sellerData.address?.phoneNumber || "Phone number not available"}</p>
             </div>
             <div className="p-4 border rounded-lg flex justify-between items-center">
@@ -119,7 +119,7 @@ const SellerProfile = () => {
                 <button
                   key={index}
                   className={`px-4 py-2 border rounded ${
-                    currentPage === index + 1 ? "bg-blue-500 text-white" : "bg-white hover:bg-gray-200"
+                    currentPage === index + 1 ? "bg-pink-500 text-white" : "bg-white hover:bg-gray-200"
                   }`}
                   onClick={() => setCurrentPage(index + 1)}
                 >

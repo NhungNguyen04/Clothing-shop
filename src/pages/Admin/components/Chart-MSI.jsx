@@ -66,7 +66,7 @@ export default function Chart() {
       title: "Total Users",
       value: userStats.totalUsers,
       desc: "All registered users",
-      icon: <FaUsers />, color: "bg-blue-100 text-blue-600"
+      icon: <FaUsers />, color: "bg-pink-100 text-pink-600"
     },
     {
       title: "Total Sellers",

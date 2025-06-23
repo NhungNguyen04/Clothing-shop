@@ -31,7 +31,7 @@ export default function Transactions() {
             value={search}
             onChange={(e) => setSearch(e.target.value)}
           />
-          <button className="bg-blue-600 text-white px-4 py-2 rounded-md flex items-center gap-2">
+          <button className="bg-pink-600 text-white px-4 py-2 rounded-md flex items-center gap-2">
             <FaSearch /> Search
           </button>
         </div>

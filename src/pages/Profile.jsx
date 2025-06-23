@@ -1,6 +1,8 @@
 import { useState } from 'react';
 import axiosInstance from '../api/axiosInstance';
 import useAuth from '../hooks/useAuth';
+import { Link } from 'react-router-dom';
+import { FaComment, FaShoppingCart, FaUser, FaHeart } from 'react-icons/fa';
 
 const Profile = () => {
     const user = useAuth()
@@ -60,6 +62,50 @@ const Profile = () => {
     return (
         <div className="p-6 w-3/4 mx-auto min-h-screen">
             {message && <p className="text-red-500">{message}</p>}
+            
+            {/* Quick Actions */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+                <Link to="/chats" className="bg-white p-4 rounded-lg shadow-md hover:shadow-lg transition-shadow">
+                  <div className="flex items-center">
+                    <FaComment className="text-2xl text-pink-600 mr-3" />
+                    <div>
+                      <h3 className="font-semibold text-gray-800">My Chats</h3>
+                      <p className="text-sm text-gray-600">View conversations</p>
+                    </div>
+                  </div>
+                </Link>
+                
+                <Link to="/orders" className="bg-white p-4 rounded-lg shadow-md hover:shadow-lg transition-shadow">
+                  <div className="flex items-center">
+                    <FaShoppingCart className="text-2xl text-blue-600 mr-3" />
+                    <div>
+                      <h3 className="font-semibold text-gray-800">My Orders</h3>
+                      <p className="text-sm text-gray-600">Track orders</p>
+                    </div>
+                  </div>
+                </Link>
+                
+                <Link to="/collection" className="bg-white p-4 rounded-lg shadow-md hover:shadow-lg transition-shadow">
+                  <div className="flex items-center">
+                    <FaHeart className="text-2xl text-red-600 mr-3" />
+                    <div>
+                      <h3 className="font-semibold text-gray-800">Shop</h3>
+                      <p className="text-sm text-gray-600">Browse products</p>
+                    </div>
+                  </div>
+                </Link>
+                
+                <Link to="/cart" className="bg-white p-4 rounded-lg shadow-md hover:shadow-lg transition-shadow">
+                  <div className="flex items-center">
+                    <FaUser className="text-2xl text-green-600 mr-3" />
+                    <div>
+                      <h3 className="font-semibold text-gray-800">Cart</h3>
+                      <p className="text-sm text-gray-600">View cart</p>
+                    </div>
+                  </div>
+                </Link>
+              </div>
+
             <div className="flex justify-center mb-4">
                 <label className="cursor-pointer">
                     <img 
@@ -107,7 +153,7 @@ const Profile = () => {
                 <div className='flex justify-end'>
                     <button
                         type="submit"
-                        className={`bg-blue-600 text-white px-4 py-2 rounded-md ${loading ? 'opacity-50' : ''}`}
+                        className={`bg-pink-600 text-white px-4 py-2 rounded-md ${loading ? 'opacity-50' : ''}`}
                         disabled={loading}
                     >
                         {loading ? 'Updating...' : 'Update Profile'}
@@ -159,7 +205,7 @@ const Profile = () => {
                             </div>
                             <button
                                 type="submit"
-                                className="bg-blue-600 text-white px-4 py-2 rounded-md"
+                                className="bg-pink-600 text-white px-4 py-2 rounded-md"
                             >
                                 Change Password
                             </button>
