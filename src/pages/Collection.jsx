@@ -24,6 +24,8 @@ function Collection() {
   const [maxReviews, setMaxReviews] = useState('');
   const [minRating, setMinRating] = useState('');
   const [maxRating, setMaxRating] = useState('');
+  const [minPrice, setMinPrice] = useState('');
+  const [maxPrice, setMaxPrice] = useState('');
 
   // Clear all filters function
   const clearAllFilters = () => {
@@ -35,6 +37,8 @@ function Collection() {
     setMaxReviews('');
     setMinRating('');
     setMaxRating('');
+    setMinPrice('');
+    setMaxPrice('');
     setSortType('relevant');
   };
 
@@ -136,6 +140,14 @@ function Collection() {
       productsCopy = productsCopy.filter((item) => item.averageRating >= parseFloat(minRating) && item.averageRating <= parseFloat(maxRating));
     }
 
+    // Price filter
+    if (minPrice) {
+      productsCopy = productsCopy.filter((item) => item.price >= parseInt(minPrice));
+    }
+    if (maxPrice) {
+      productsCopy = productsCopy.filter((item) => item.price <= parseInt(maxPrice));
+    }
+
     setFilterProducts(productsCopy);
   };
 
@@ -169,7 +181,7 @@ function Collection() {
 
   useEffect(() => {
     applyFilter();
-  }, [category, subCategory, search, sellerSearch, products, currentPage, minReviews, maxReviews, minRating, maxRating]);
+  }, [category, subCategory, search, sellerSearch, products, currentPage, minReviews, maxReviews, minRating, maxRating, minPrice, maxPrice]);
 
   useEffect(() => {
     sortProducts();
@@ -262,77 +274,87 @@ function Collection() {
             </div>
 
             {/* Reviews Count Section */}
-            <div className={`border border-gray-300 p-4 rounded-md my-5 ${showFilter ? '' : 'hidden'} sm:block`}>
-              <p className='mb-3 text-base font-semibold'>REVIEWS COUNT</p>
-              <div className='flex items-center gap-2 text-sm'>
-                <input 
-                  type="number" 
-                  placeholder="Min" 
-                  value={minReviews}
-                  onChange={(e) => setMinReviews(e.target.value)}
-                  className='w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-pink-500 focus:border-pink-500 transition'
-                />
-                <span className='text-gray-500'>to</span>
-                <input 
-                  type="number" 
-                  placeholder="Max" 
-                  value={maxReviews}
-                  onChange={(e) => setMaxReviews(e.target.value)}
-                  className='w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-pink-500 focus:border-pink-500 transition'
-                />
+            <div className={`border border-gray-300 p-3 rounded-md my-5 ${showFilter ? '' : 'hidden'} sm:block`}>
+              <p className='mb-2 text-sm font-medium text-gray-800'>Reviews Count</p>
+              <div className='flex flex-col gap-2'>
+                <div>
+                  <label className='block text-xs text-gray-600 mb-1'>Minimum</label>
+                  <input 
+                    type="number" 
+                    placeholder="e.g. 10" 
+                    value={minReviews}
+                    onChange={(e) => setMinReviews(e.target.value)}
+                    className='w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-pink-500 focus:border-pink-500 transition'
+                  />
+                </div>
+                <div>
+                  <label className='block text-xs text-gray-600 mb-1'>Maximum</label>
+                  <input 
+                    type="number" 
+                    placeholder="e.g. 500" 
+                    value={maxReviews}
+                    onChange={(e) => setMaxReviews(e.target.value)}
+                    className='w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-pink-500 focus:border-pink-500 transition'
+                  />
+                </div>
               </div>
             </div>
 
             {/* Average Rating Section */}
-            <div className={`border border-gray-300 p-4 rounded-md my-5 ${showFilter ? '' : 'hidden'} sm:block`}>
-              <p className='mb-3 text-base font-semibold'>AVERAGE RATING</p>
-              <div className='flex items-center gap-2 text-sm'>
-                <input 
-                  type="number" 
-                  placeholder="Min" 
-                  value={minRating}
-                  onChange={(e) => setMinRating(e.target.value)}
-                  min="0"
-                  max="5"
-                  step="0.1"
-                  className='w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-pink-500 focus:border-pink-500 transition'
-                />
-                <span className='text-gray-500'>to</span>
-                <input 
-                  type="number" 
-                  placeholder="Max" 
-                  value={maxRating}
-                  onChange={(e) => setMaxRating(e.target.value)}
-                  min="0"
-                  max="5"
-                  step="0.1"
-                  className='w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-pink-500 focus:border-pink-500 transition'
-                />
+            <div className={`border border-gray-300 p-3 rounded-md my-5 ${showFilter ? '' : 'hidden'} sm:block`}>
+              <p className='mb-2 text-sm font-medium text-gray-800'>Average Rating</p>
+              <div className='flex flex-col gap-2'>
+                <div>
+                  <label className='block text-xs text-gray-600 mb-1'>Minimum</label>
+                  <input 
+                    type="number" 
+                    placeholder="e.g. 4.0" 
+                    value={minRating}
+                    onChange={(e) => setMinRating(e.target.value)}
+                    min="0"
+                    max="5"
+                    step="0.1"
+                    className='w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-pink-500 focus:border-pink-500 transition'
+                  />
+                </div>
+                <div>
+                  <label className='block text-xs text-gray-600 mb-1'>Maximum</label>
+                  <input 
+                    type="number" 
+                    placeholder="e.g. 5.0" 
+                    value={maxRating}
+                    onChange={(e) => setMaxRating(e.target.value)}
+                    min="0"
+                    max="5"
+                    step="0.1"
+                    className='w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-pink-500 focus:border-pink-500 transition'
+                  />
+                </div>
               </div>
             </div>
 
             {/* Price Section */}
-            <div className={`border border-gray-300 pl-5 py-3 ${showFilter ? '' : 'hidden'} sm:block`}>
-              <p className='mb-3 text-sm font-medium'>PRICE</p>
-              <div className='flex flex-col gap-2 text-sm'>
+            <div className={`border border-gray-300 p-3 rounded-md my-5 ${showFilter ? '' : 'hidden'} sm:block`}>
+              <p className='mb-2 text-sm font-medium text-gray-800'>Price</p>
+              <div className='flex flex-col gap-2'>
                 <div>
-                  <label className='block text-xs text-gray-600 mb-1'>Min Price</label>
+                  <label className='block text-xs text-gray-600 mb-1'>Minimum</label>
                   <input 
                     type="number" 
-                    placeholder="0"
+                    placeholder="e.g. 100" 
                     value={minPrice}
                     onChange={(e) => setMinPrice(e.target.value)}
-                    className='w-full px-2 py-1 border border-gray-300 rounded text-xs'
+                    className='w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-pink-500 focus:border-pink-500 transition'
                   />
                 </div>
                 <div>
-                  <label className='block text-xs text-gray-600 mb-1'>Max Price</label>
+                  <label className='block text-xs text-gray-600 mb-1'>Maximum</label>
                   <input 
                     type="number" 
-                    placeholder="1000"
+                    placeholder="e.g. 5000" 
                     value={maxPrice}
                     onChange={(e) => setMaxPrice(e.target.value)}
-                    className='w-full px-2 py-1 border border-gray-300 rounded text-xs'
+                    className='w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-pink-500 focus:border-pink-500 transition'
                   />
                 </div>
               </div>
