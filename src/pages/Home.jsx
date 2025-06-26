@@ -1,20 +1,21 @@
-import { useEffect } from 'react'
+import { useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import Hero from '../components/Hero'
 import LatestCollection from '../components/LatestCollection'
 import BestSeller from '../components/BestSeller'
 import OurPolicies from '../components/OurPolicies'
 import NewsLetterBox from '../components/NewsLetterBox'
-import { useProductStore } from '../store/ProductStore'
 
 const Home = () => {
-  const { fetchProducts, fetchRecentProducts } = useProductStore();
-
+  const navigate = useNavigate();
   useEffect(() => {
-    // Fetch all products when the home page loads
-    fetchProducts();
-    // Fetch recent products for the latest collection section
-    fetchRecentProducts();
-  }, [fetchProducts, fetchRecentProducts]);
+    const user = JSON.parse(localStorage.getItem('user'));
+    if (user?.role === 'ADMIN') {
+      navigate('/admin/dashboard', { replace: true });
+    } else if (user?.role === 'SELLER') {
+      navigate('/seller/dashboard', { replace: true });
+    }
+  }, [navigate]);
 
   return (
     <div>

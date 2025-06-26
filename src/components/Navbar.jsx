@@ -104,7 +104,7 @@ const Navbar = () => {
                 />
               </div>
               {dropdownOpen && (
-                <div className="absolute left-1/2 transform -translate-x-1/2 top-[110%] w-48 bg-white shadow-lg rounded-md py-2 z-50 border border-gray-200">
+                <div className="absolute left-1/2 transform -translate-x-1/2 top-[110%] w-48 bg-white shadow-lg rounded-md py-2 z-30 border border-gray-200">
                   <button
                     onClick={handleLogout}
                     className="block w-full text-left px-4 py-2 text-gray-700 hover:bg-gray-100"

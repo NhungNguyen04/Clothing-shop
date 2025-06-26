@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { FaStore, FaComment, FaArrowLeft, FaSearch } from 'react-icons/fa';
 import { toast } from 'react-toastify';
 import useAuth from '../hooks/useAuth';
-import { getUserConversations } from '../services/chat';
+import { getUserConversations, getLastMessage } from '../services/chat';
 import Spinner from '../components/Spinner';
 
 const Chats = () => {
@@ -25,7 +25,14 @@ const Chats = () => {
       try {
         setLoading(true);
         const conversationsData = await getUserConversations(user.id);
-        setConversations(conversationsData);
+        // Fetch last message for each conversation in parallel
+        const conversationsWithLastMessage = await Promise.all(
+          conversationsData.map(async (conv) => {
+            const lastMessage = await getLastMessage(conv.id);
+            return { ...conv, lastMessage };
+          })
+        );
+        setConversations(conversationsWithLastMessage);
       } catch (error) {
         console.error('Error loading conversations:', error);
         toast.error('Failed to load conversations');
@@ -156,7 +163,10 @@ const Chats = () => {
                     
                     {conversation.lastMessage ? (
                       <p className="text-sm text-gray-500 truncate mt-1">
-                        {truncateMessage(conversation.lastMessage.content)}
+                        {conversation.lastMessage.senderId === user?.id
+                          ? `Tôi: ${truncateMessage(conversation.lastMessage.content)}`
+                          : truncateMessage(conversation.lastMessage.content)
+                        }
                       </p>
                     ) : (
                       <p className="text-sm text-gray-400 italic mt-1">
