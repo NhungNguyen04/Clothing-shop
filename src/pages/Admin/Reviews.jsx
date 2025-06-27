@@ -9,53 +9,79 @@ import Spinner from '../../components/Spinner';
 const Reviews = () => {
     const user = useAuth();
     const { seller, loading: sellerLoading } = useSeller();
+    console.log('Reviews.jsx user:', user);
     const [reviews, setReviews] = useState([]);
     const [searchTerm, setSearchTerm] = useState("");
     const [rowsPerPage, setRowsPerPage] = useState(5);
     const [currentPage, setCurrentPage] = useState(1);
     const [totalReviews, setTotalReviews] = useState(0);
-    const [loading, setLoading] = useState(true); // State to manage loading
+    const [loading, setLoading] = useState(true);
+    const [filterOption, setFilterOption] = useState("all"); // all, seller, product
+    const [filterValue, setFilterValue] = useState("");
 
     useEffect(() => {
-        if (sellerLoading) return;
-        if (seller?.id) fetchReviews();
-        else setLoading(false);
-    }, [seller?.id, sellerLoading]);
+        let ignore = false;
+        const fetch = async () => {
+            setLoading(true);
+            try {
+                // Luôn gọi tất cả reviews cho admin
+                if (user.user?.role === 'ADMIN') {
+                    console.log('Fetching all reviews as admin');
+                    await fetchAllReviews();
+                } else if (!sellerLoading && seller?.id) {
+                    console.log('Fetching seller reviews', seller.id);
+                    await fetchReviewsSeller(seller.id);
+                }
+            } finally {
+                if (!ignore) setLoading(false);
+            }
+        };
+        fetch();
+        return () => { ignore = true; };
+    }, [user.user?.role, seller?.id, sellerLoading]);
 
-    const fetchReviews = async () => {
+    const fetchAllReviews = async () => {
         try {
-            const response = await axiosInstance.get(`/reviews/seller/${seller?.id}`);
+            const response = await axiosInstance.get('/reviews');
             setReviews(response.data.data);
             setTotalReviews(response.data.data.length);
-            await handlePageChange(1, rowsPerPage);
         } catch (error) {
-            console.error("Error fetching reviews:", error);
+            setReviews([]);
         }
     };
 
-    const handlePageChange = async (page, rowsPerPage) => {
-        setLoading(true);
-        setCurrentPage(page);
-        const response = await axiosInstance.get(`/reviews/seller/${seller?.id}?page=${page}&limit=${rowsPerPage}`);
-        setReviews(response.data.data);
-        setLoading(false);
+    const fetchReviewsSeller = async (sellerId) => {
+        try {
+            const url = `/reviews/seller/${sellerId}`;
+            console.log('Calling API:', url);
+            const response = await axiosInstance.get(url);
+            setReviews(response.data.data);
+            setTotalReviews(response.data.data.length);
+        } catch (error) {
+            setReviews([]);
+        }
     };
 
-    const handleRowsPerPageChange = async (limit) => {
-        setRowsPerPage(limit);
-        await handlePageChange(1, limit);
-    };
+    // FE filter logic
+    const filteredReviews = reviews.filter(review => {
+        const matchSearch = review.product?.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            review.user?.name?.toLowerCase().includes(searchTerm.toLowerCase());
+        if (user.user?.role === 'ADMIN') {
+            if (filterOption === 'all') return matchSearch;
+            if (filterOption === 'seller' && filterValue) return matchSearch && review.product?.sellerId === filterValue;
+            if (filterOption === 'product' && filterValue) return matchSearch && review.productId === filterValue;
+            return matchSearch;
+        }
+        return matchSearch;
+    });
 
-    const filteredReviews = reviews.filter(review =>
-        review.product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        review.user.name.toLowerCase().includes(searchTerm.toLowerCase())
-    );
+    // FE pagination
+    const paginatedReviews = filteredReviews.slice((currentPage - 1) * rowsPerPage, currentPage * rowsPerPage);
+    const totalPages = Math.ceil(filteredReviews.length / rowsPerPage);
 
     const handleDelete = (id) => {
-        console.log(`Delete review with id: ${id}`);
+        // TODO: implement delete review
     };
-
-    const totalPages = Math.ceil(totalReviews / rowsPerPage);
 
     return (
         <AdminLayout>
@@ -64,19 +90,40 @@ const Reviews = () => {
                     <div className="flex justify-center items-center h-96"><Spinner /></div>
                 ) : (
                 <>
-                <div className="mb-4 flex justify-between items-center">
-                    <h1 className="text-2xl font-semibold">Reviews</h1>
+                <div className="mb-4 flex flex-wrap gap-2 justify-end items-center">
+                    {user.user?.role === 'ADMIN' && (
+                        <div className="flex gap-2 items-center">
+                            <select
+                                value={filterOption}
+                                onChange={e => { setFilterOption(e.target.value); setFilterValue(''); setCurrentPage(1); }}
+                                className="p-2 border border-gray-300 rounded-md"
+                            >
+                                <option value="all">All reviews</option>
+                                <option value="seller">By seller</option>
+                                <option value="product">By product</option>
+                            </select>
+                            {(filterOption === 'seller' || filterOption === 'product') && (
+                                <input
+                                    type="text"
+                                    placeholder={filterOption === 'seller' ? 'Seller ID...' : 'Product ID...'}
+                                    className="p-2 border border-gray-300 rounded-md"
+                                    value={filterValue}
+                                    onChange={e => { setFilterValue(e.target.value); setCurrentPage(1); }}
+                                />
+                            )}
+                        </div>
+                    )}
                     <input
                         type="text"
                         placeholder="Search..."
                         className="p-2 border border-gray-300 rounded-md w-64"
                         value={searchTerm}
-                        onChange={(e) => setSearchTerm(e.target.value)}
+                        onChange={(e) => { setSearchTerm(e.target.value); setCurrentPage(1); }}
                     />
                     <select
                         value={rowsPerPage}
-                        onChange={(e) => handleRowsPerPageChange(Number(e.target.value))}
-                        className="p-2 border border-gray-300 rounded-md ml-4"
+                        onChange={(e) => { setRowsPerPage(Number(e.target.value)); setCurrentPage(1); }}
+                        className="p-2 border border-gray-300 rounded-md"
                     >
                         <option value={5}>5</option>
                         <option value={10}>10</option>
@@ -97,18 +144,18 @@ const Reviews = () => {
                             </tr>
                         </thead>
                         <tbody>
-                            {filteredReviews.map((review) => (
+                            {paginatedReviews.map((review) => (
                                 <tr key={review.id} className="border-b">
                                     <td className="p-3">{review.id}</td>
-                                    <td className="p-3">{review.product.name}</td>
-                                    <td className="p-3">{review.user.name}</td>
+                                    <td className="p-3">{review.product?.name}</td>
+                                    <td className="p-3">{review.user?.name}</td>
                                     <td className="p-3">
-                                        {"⭐".repeat(review.rating)}{" "}
+                                        {"\u2b50".repeat(review.rating)}{" "}
                                         <span className="text-gray-400">
-                                            {"☆".repeat(5 - review.rating)}
+                                            {"\u2606".repeat(5 - review.rating)}
                                         </span>
                                     </td>
-                                    <td className="p-3">{review.date}</td>
+                                    <td className="p-3">{review.date || review.reviewDate || review.createdAt}</td>
                                     <td className="p-3">{review.comment}</td>
                                     <td className="p-3">
                                         <button onClick={() => handleDelete(review.id)} className="text-red-500 ml-2">
@@ -124,14 +171,14 @@ const Reviews = () => {
                     {Array.from({ length: totalPages }, (_, index) => (
                         <button
                             key={index}
-                            onClick={() => handlePageChange(index + 1, rowsPerPage)}
+                            onClick={() => setCurrentPage(index + 1)}
                             className={`px-3 py-1 ${currentPage === index + 1 ? 'bg-pink-500 text-white' : 'border'}`}
                         >
                             {index + 1}
                         </button>
                     ))}
                     <button
-                        onClick={() => handlePageChange(currentPage + 1, rowsPerPage)}
+                        onClick={() => setCurrentPage(currentPage + 1)}
                         className="px-3 py-1 border"
                         disabled={currentPage === totalPages}
                     >
