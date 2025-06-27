@@ -1,13 +1,5 @@
-import { useState } from "react";
-
-const ordersData = [
-  { id: "#SK2540", name: "Neal Matthews", date: "07 Oct, 2022", total: "$400", status: "Paid", method: "Mastercard" },
-  { id: "#SK2541", name: "Jamal Burnett", date: "07 Oct, 2022", total: "$380", status: "Chargeback", method: "Visa" },
-  { id: "#SK2542", name: "Juan Mitchell", date: "06 Oct, 2022", total: "$384", status: "Paid", method: "Paypal" },
-  { id: "#SK2543", name: "Barry Dick", date: "05 Oct, 2022", total: "$412", status: "Paid", method: "Mastercard" },
-  { id: "#SK2544", name: "Ronald Taylor", date: "04 Oct, 2022", total: "$404", status: "Refund", method: "Visa" },
-  { id: "#SK2545", name: "Jacob Hunter", date: "04 Oct, 2022", total: "$392", status: "Paid", method: "Paypal" }
-];
+import { useEffect, useState } from "react";
+import SellerReportService from '../../../services/seller/report';
 
 const statusColors = {
   Paid: "bg-green-100 text-green-700",
@@ -15,74 +7,107 @@ const statusColors = {
   Refund: "bg-yellow-100 text-yellow-700"
 };
 
-export default function OrdersList() {
-  const [currentPage, setCurrentPage] = useState(1);
-  const ordersPerPage = 3;
-  const totalPages = Math.ceil(ordersData.length / ordersPerPage);
+export default function OrdersList({ sellerId, limit = 5 }) {
+  const [orders, setOrders] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [showModal, setShowModal] = useState(false);
+  const [selectedOrder, setSelectedOrder] = useState(null);
 
-  const handlePageChange = (page) => {
-    if (page > 0 && page <= totalPages) setCurrentPage(page);
+  useEffect(() => {
+    if (!sellerId) return;
+    setLoading(true);
+    SellerReportService.getOrdersReport(sellerId, undefined, 1, 100)
+      .then(data => {
+        setOrders(data.orders || []);
+      })
+      .catch(() => setOrders([]))
+      .finally(() => setLoading(false));
+  }, [sellerId]);
+
+  const recentOrders = orders.slice(0, limit);
+
+  const handleViewDetails = (order) => {
+    setSelectedOrder(order);
+    setShowModal(true);
   };
 
-  const paginatedOrders = ordersData.slice(
-    (currentPage - 1) * ordersPerPage,
-    currentPage * ordersPerPage
-  );
+  const closeModal = () => {
+    setShowModal(false);
+    setSelectedOrder(null);
+  };
+
+  if (loading) return <div className="p-6 text-center">Loading orders...</div>;
+  if (!orders.length) return <div className="p-6 text-center text-gray-500">No orders found.</div>;
 
   return (
-    <div className="p-6 m-6 bg-white shadow-md rounded-lg">
-      <h2 className="text-xl font-semibold mb-4">Latest Orders</h2>
-      <div className="overflow-x-auto">
-        <table className="w-full border-collapse">
-          <thead>
-            <tr className="bg-gray-100 text-left">
-              <th className="p-3">Order ID</th>
-              <th className="p-3">Billing Name</th>
-              <th className="p-3">Date</th>
-              <th className="p-3">Total</th>
-              <th className="p-3">Payment Status</th>
-              <th className="p-3">Payment Method</th>
-              <th className="p-3">View Details</th>
+    <>
+    <div className="overflow-x-auto">
+      <table className="w-full border-collapse">
+        <thead>
+          <tr className="bg-gray-100 text-left">
+            <th className="p-3">Order ID</th>
+            <th className="p-3">Customer</th>
+            <th className="p-3">Date</th>
+            <th className="p-3">Total</th>
+            <th className="p-3">Status</th>
+            <th className="p-3">View Details</th>
+          </tr>
+        </thead>
+        <tbody>
+          {recentOrders.map((order) => (
+            <tr key={order.id} className="border-b">
+              <td className="p-3 text-blue-500">{order.id}</td>
+              <td className="p-3">{order.customerName || order.user?.name || order.user?.email || 'N/A'}</td>
+              <td className="p-3">{new Date(order.orderDate || order.createdAt).toLocaleDateString()}</td>
+              <td className="p-3">{typeof order.totalPrice === 'number' ? `$${order.totalPrice.toFixed(2)}` : 'N/A'}</td>
+              <td className="p-3">
+                <span className={`px-2 py-1 text-sm rounded ${statusColors[order.status] || 'bg-gray-100 text-gray-700'}`}>
+                  {order.status}
+                </span>
+              </td>
+              <td className="p-3">
+                <button className="bg-teal-700 text-white px-3 py-1 rounded" onClick={() => handleViewDetails(order)}>View Details</button>
+              </td>
             </tr>
-          </thead>
-          <tbody>
-            {paginatedOrders.map((order) => (
-              <tr key={order.id} className="border-b">
-                <td className="p-3 text-blue-500">{order.id}</td>
-                <td className="p-3">{order.name}</td>
-                <td className="p-3">{order.date}</td>
-                <td className="p-3">{order.total}</td>
-                <td className="p-3">
-                  <span className={`px-2 py-1 text-sm rounded ${statusColors[order.status]}`}>
-                    {order.status}
-                  </span>
-                </td>
-                <td className="p-3">{order.method}</td>
-                <td className="p-3">
-                  <button className="bg-teal-700 text-white px-3 py-1 rounded">View Details</button>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-      <div className="flex justify-center space-x-2 mt-4">
-        <button onClick={() => handlePageChange(currentPage - 1)} className="px-3 py-1 bg-gray-200 rounded disabled:opacity-50" disabled={currentPage === 1}>
-          Prev
-        </button>
-        {[...Array(totalPages)].map((_, i) => (
-          <button
-            key={i}
-            onClick={() => handlePageChange(i + 1)}
-            className={`px-3 py-1 rounded ${currentPage === i + 1 ? "bg-teal-700 text-white" : "bg-gray-200"}`}
-          >
-            {i + 1}
-          </button>
-        ))}
-        <button onClick={() => handlePageChange(currentPage + 1)} className="px-3 py-1 bg-gray-200 rounded disabled:opacity-50" disabled={currentPage === totalPages}>
-          Next
-        </button>
-      </div>
+          ))}
+        </tbody>
+      </table>
     </div>
+    {showModal && selectedOrder && (
+      <div className="fixed inset-0 flex items-center justify-center z-50 bg-black bg-opacity-50">
+        <div className="bg-white p-6 rounded-lg w-3/4 max-w-4xl">
+          <h2 className="text-2xl font-semibold mb-4 text-center">Order Details</h2>
+          <h3 className="text-xl mb-4">Products</h3>
+          <table className="w-full table-auto border-collapse">
+            <thead>
+              <tr className="bg-gray-100 text-center">
+                <th className="px-4 py-2">Image</th>
+                <th className="px-4 py-2">Product Name</th>
+                <th className="px-4 py-2">Size</th>
+                <th className="px-4 py-2">Quantity</th>
+                <th className="px-4 py-2">Total</th>
+              </tr>
+            </thead>
+            <tbody>
+              {selectedOrder.orderItems && selectedOrder.orderItems.map((item, index) => (
+                <tr key={index} className="border-t text-center">
+                  <td className="py-2 flex justify-center">
+                    <img src={item.sizeStock.product.image[0]} alt={item.sizeStock.product.name} className="w-12 h-12 object-cover rounded-md" />
+                  </td>
+                  <td className="py-2">{item.sizeStock.product.name}</td>
+                  <td className="py-2">{item.sizeStock.size}</td>
+                  <td className="py-2">{item.quantity}</td>
+                  <td className="py-2">{typeof item.totalPrice === 'number' ? `$${item.totalPrice.toFixed(2)}` : 'N/A'}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+          <div className="mt-4 flex justify-end">
+            <button className="bg-gray-600 text-white px-4 py-2 rounded-md" onClick={closeModal}>Close</button>
+          </div>
+        </div>
+      </div>
+    )}
+    </>
   );
 }

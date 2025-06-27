@@ -4,6 +4,8 @@ import AdminLayout from "./components/AdminLayout";
 import axiosInstance from "../../api/axiosInstance";
 import useAuth from "../../hooks/useAuth";
 import { motion } from "framer-motion";
+import useSeller from '../../hooks/useSeller';
+import Spinner from '../../components/Spinner';
 
 const statusColors = {
   "PENDING": "bg-orange-100 text-orange-700",
@@ -22,67 +24,45 @@ export default function OrderList() {
   const [dropdownOpen, setDropdownOpen] = useState(null);
   const user = useAuth();
   const [orders, setOrders] = useState([]);
-  const [ordersSummary, setOrdersSummary] = useState([]);
+  const { seller, loading: sellerLoading } = useSeller();
+  const [loading, setLoading] = useState(true);
 
+  const rowVariants = {
+    hidden: { opacity: 0, y: 10 },
+    visible: (index) => ({
+      opacity: 1,
+      y: 0,
+      transition: { delay: index * 0.1 },
+    }),
+  };
 
-    const rowVariants = {
-      hidden: { opacity: 0, y: 10 },
-      visible: (index) => ({
-        opacity: 1,
-        y: 0,
-        transition: { delay: index * 0.1 },
-      }),
-    };
   const getList = useCallback(async () => {
     try {
-      const response = await axiosInstance.get(`/orders/seller/${user?.idSeller}`);
+      setLoading(true);
+      if (!seller?.id) return;
+      const response = await axiosInstance.get(`/orders/seller/${seller.id}`);
       const ordersData = response.data.data;
       setOrders(ordersData);
     } catch (error) {
       console.error("Error fetching orders:", error);
+    } finally {
+      setLoading(false);
     }
-  }, [user?.idSeller]);
+  }, [seller?.id]);
 
   useEffect(() => {
-    if (user?.idSeller) {
+    if (seller?.id) {
       getList();
     }
-  }, [user?.idSeller, getList]);
+  }, [seller?.id, getList]);
 
-  const groupOrdersByDateAndCustomer = useCallback(() => {
-    const grouped = {};
-
-    orders.forEach(order => {
-      const orderDate = new Date(order.orderDate).toLocaleDateString("en-GB");
-      const customerName = order.customerName;
-      order.product.size = order.size
-      order.product.quantity = order.quantity;
-
-      const groupKey = `${orderDate}-${customerName}`;
-
-      if (!grouped[groupKey]) {
-        grouped[groupKey] = {
-          name: customerName,
-          email: order.user.email,
-          total: 0,
-          status: order.status,
-          date: orderDate,
-          orderId: order.id,
-          products: [],
-        };
-      }
-
-      grouped[groupKey].total += order.price;
-      grouped[groupKey].products.push(order.product);
-    });
-
-    return Object.values(grouped);
-  }, [orders]);
-
-  useEffect(() => {
-    const summary = groupOrdersByDateAndCustomer();
-    setOrdersSummary(summary);
-  }, [orders, groupOrdersByDateAndCustomer]);
+  // Filter and search logic
+  const filteredOrders = orders
+    .filter(order =>
+      (!statusFilter || order.status === statusFilter.toUpperCase()) &&
+      (!search || (order.user?.name?.toLowerCase().includes(search.toLowerCase()) || order.user?.email?.toLowerCase().includes(search.toLowerCase())))
+    )
+    .slice(0, showCount);
 
   const openDetailModal = (order) => {
     setSelectedOrder(order);
@@ -97,14 +77,7 @@ export default function OrderList() {
   const handleStatusChange = async (newStatus, orderId) => {
     try {
       await axiosInstance.patch(`/orders/${orderId}`, { status: newStatus });
-
-      setOrdersSummary(prevState =>
-        prevState.map(order => 
-          order.orderId === orderId 
-            ? { ...order, status: newStatus } 
-            : order
-        )
-      );
+      setOrders(prev => prev.map(order => order.id === orderId ? { ...order, status: newStatus } : order));
     } catch (error) {
       console.error("Error updating status:", error);
     }
@@ -115,7 +88,6 @@ export default function OrderList() {
       <div className="p-6 bg-gray-100 min-h-screen">
         <h1 className="text-3xl font-semibold">Order List</h1>
         <p className="text-gray-500">Lorem ipsum dolor sit amet.</p>
-
         <div className="bg-white p-4 rounded-lg shadow-md mt-4 flex gap-4 flex-wrap">
           <input
             type="text"
@@ -124,18 +96,16 @@ export default function OrderList() {
             value={search}
             onChange={(e) => setSearch(e.target.value)}
           />
-
           <select
             className="p-2 border rounded-md"
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value)}
           >
             <option value="">Status</option>
-            <option value="Pending">Pending</option>
-            <option value="Canceled">Canceled</option>
-            <option value="Done">Done</option>
+            <option value="PENDING">Pending</option>
+            <option value="CANCELED">Canceled</option>
+            <option value="COMPLETED">Done</option>
           </select>
-
           <select
             className="p-2 border rounded-md"
             value={showCount}
@@ -146,7 +116,9 @@ export default function OrderList() {
             <option value="50">Show 50</option>
           </select>
         </div>
-
+        {loading ? (
+          <div className="flex justify-center items-center py-10"><Spinner /></div>
+        ) : (
         <div className="mt-4 bg-white rounded-lg shadow-md overflow-hidden">
           <table className="w-full border-collapse">
             <thead className="bg-gray-100 w-full">
@@ -161,9 +133,9 @@ export default function OrderList() {
               </tr>
             </thead>
             <tbody>
-              {ordersSummary.slice(0, showCount).map((order, index) => (
+              {filteredOrders.map((order, index) => (
                 <motion.tr
-                  key={index}
+                  key={order.id}
                   className="border-t"
                   variants={rowVariants}
                   initial="hidden"
@@ -171,14 +143,14 @@ export default function OrderList() {
                   custom={index}
                 >
                   <td className="p-3">{index + 1}</td>
-                  <td className="p-3">{order.name}</td>
-                  <td className="p-3">{order.email}</td>
-                  <td className="p-3">${order.total.toFixed(2)}</td>
+                  <td className="p-3">{order.user?.name || 'N/A'}</td>
+                  <td className="p-3">{order.user?.email || 'N/A'}</td>
+                  <td className="p-3">${order.totalPrice?.toFixed(2) ?? 'N/A'}</td>
                   <td className="p-3">
                     <select
                       className={`px-2 py-1 text-sm font-semibold rounded-full ${statusColors[order.status]}`}
                       value={order.status}
-                      onChange={(e) => handleStatusChange(e.target.value, order.orderId)}
+                      onChange={(e) => handleStatusChange(e.target.value, order.id)}
                     >
                       {statusList.map(status => (
                         <option key={status} value={status}>
@@ -187,17 +159,15 @@ export default function OrderList() {
                       ))}
                     </select>
                   </td>
-                  <td className="p-3">{order.date}</td>
+                  <td className="p-3">{new Date(order.orderDate || order.createdAt).toLocaleDateString()}</td>
                   <td className="p-3 text-center">
                     <button
                       className="p-2 rounded-full hover:bg-gray-200 relative z-10"
-                      onClick={() =>
-                        setDropdownOpen(dropdownOpen === order.orderId ? null : order.orderId)
-                      }
+                      onClick={() => setDropdownOpen(dropdownOpen === order.id ? null : order.id)}
                     >
                       <FaEllipsisV />
                     </button>
-                    {dropdownOpen === order.orderId && (
+                    {dropdownOpen === order.id && (
                       <div className="absolute right-5 bg-white border border-gray-200 shadow-md rounded-lg w-32 z-20">
                         <button onClick={() => openDetailModal(order)} className="flex items-center px-4 py-2 hover:bg-gray-100 w-full text-left">
                           <FaEdit className="mr-2 text-pink-500" /> Detail
@@ -211,9 +181,9 @@ export default function OrderList() {
                 </motion.tr>
               ))}
             </tbody>
-
           </table>
         </div>
+        )}
       </div>
 
       {showModal && selectedOrder && (
@@ -235,16 +205,16 @@ export default function OrderList() {
                 </tr>
               </thead>
               <tbody>
-                {selectedOrder.products.map((product, index) => (
+                {selectedOrder.orderItems && selectedOrder.orderItems.map((item, index) => (
                   <tr key={index} className="border-t text-center">
                     <td className="py-2 flex justify-center">
-                      <img src={product.image} alt={product.name} className="w-12 h-12 object-cover rounded-md" />
+                      <img src={item.sizeStock.product.image[0]} alt={item.sizeStock.product.name} className="w-12 h-12 object-cover rounded-md" />
                     </td>
-                    <td className="py-2">{product.name}</td>
-                    <td className="py-2">{product.size}</td>
-                    <td className="py-2">${product.price.toFixed(2)}</td>
-                    <td className="py-2">{product.quantity}</td>
-                    <td className="py-2">${(product.price * product.quantity).toFixed(2)}</td>
+                    <td className="py-2">{item.sizeStock.product.name}</td>
+                    <td className="py-2">{item.sizeStock.size}</td>
+                    <td className="py-2">${item.sizeStock.product.price.toFixed(2)}</td>
+                    <td className="py-2">{item.quantity}</td>
+                    <td className="py-2">${item.totalPrice.toFixed(2)}</td>
                   </tr>
                 ))}
               </tbody>

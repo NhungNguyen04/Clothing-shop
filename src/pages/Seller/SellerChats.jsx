@@ -48,7 +48,9 @@ const SellerChats = () => {
 
   const filteredConversations = conversations.filter(conversation => {
     const customerName = conversation.user?.name || conversation.user?.email || '';
-    const lastMessage = conversation.lastMessage?.content || '';
+    const lastMessage = conversation.messages && conversation.messages[0]
+      ? conversation.messages[0].content
+      : '';
     const searchLower = searchTerm.toLowerCase();
     
     return customerName.toLowerCase().includes(searchLower) || 
@@ -135,16 +137,19 @@ const SellerChats = () => {
                       <h3 className="text-sm font-medium text-gray-900 truncate">
                         {conversation.user?.name || conversation.user?.email || 'Unknown Customer'}
                       </h3>
-                      {conversation.lastMessage && (
+                      {conversation.messages && conversation.messages[0] && (
                         <span className="text-xs text-gray-500">
-                          {formatTime(conversation.lastMessage.createdAt)}
+                          {formatTime(conversation.messages[0].createdAt)}
                         </span>
                       )}
                     </div>
                     
-                    {conversation.lastMessage ? (
+                    {conversation.messages && conversation.messages[0] ? (
                       <p className="text-sm text-gray-500 truncate mt-1">
-                        {truncateMessage(conversation.lastMessage.content)}
+                        {conversation.messages[0].senderId === seller?.userId || conversation.messages[0].senderId === seller?.id
+                          ? `Tôi: ${truncateMessage(conversation.messages[0].content)}`
+                          : truncateMessage(conversation.messages[0].content)
+                        }
                       </p>
                     ) : (
                       <p className="text-sm text-gray-400 italic mt-1">

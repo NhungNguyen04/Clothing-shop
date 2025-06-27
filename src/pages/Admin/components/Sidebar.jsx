@@ -9,7 +9,6 @@ const menuItems = {
   admin: [
     { name: "Dashboard", icon: <FaHome />, link: "/admin/dashboard" },
     { name: "Seller", icon: <FaUsers />, link: "/admin/seller-list" },
-    { name: "Transactions", icon: <FaDollarSign />, link: "/admin/transactions" },
     { name: "Account", icon: <FaUser />, subMenu: [
         { name: "Customer Account", link: "/admin/customer-accounts" },
         { name: "Admin Account", link: "/admin/admin-accounts" }
@@ -21,7 +20,6 @@ const menuItems = {
     { name: "Products", icon: <FaBox />, link: "/seller/products" },
     { name: "Orders", icon: <FaShoppingCart />, link: "/seller/orders" },
     { name: "Chats", icon: <FaComment />, link: "/seller/chats" },
-    { name: "Transactions", icon: <FaDollarSign />, link: "/seller/transactions" },
     { name: "Reviews", icon: <FaStar />, link: "/seller/reviews" },
   ]
 };

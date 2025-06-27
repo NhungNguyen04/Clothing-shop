@@ -3,23 +3,28 @@ import { useState, useEffect } from "react";
 import { FaTrash } from "react-icons/fa";
 import useAuth from "../../hooks/useAuth";
 import axiosInstance from "../../api/axiosInstance";
+import useSeller from '../../hooks/useSeller';
+import Spinner from '../../components/Spinner';
 
 const Reviews = () => {
     const user = useAuth();
+    const { seller, loading: sellerLoading } = useSeller();
     const [reviews, setReviews] = useState([]);
     const [searchTerm, setSearchTerm] = useState("");
     const [rowsPerPage, setRowsPerPage] = useState(5);
     const [currentPage, setCurrentPage] = useState(1);
     const [totalReviews, setTotalReviews] = useState(0);
-    const [loading, setLoading] = useState(false); // State to manage loading
+    const [loading, setLoading] = useState(true); // State to manage loading
 
     useEffect(() => {
-        fetchReviews();
-    }, [user?.idSeller]);
+        if (sellerLoading) return;
+        if (seller?.id) fetchReviews();
+        else setLoading(false);
+    }, [seller?.id, sellerLoading]);
 
     const fetchReviews = async () => {
         try {
-            const response = await axiosInstance.get(`/reviews/seller/${user?.idSeller}`);
+            const response = await axiosInstance.get(`/reviews/seller/${seller?.id}`);
             setReviews(response.data.data);
             setTotalReviews(response.data.data.length);
             await handlePageChange(1, rowsPerPage);
@@ -31,7 +36,7 @@ const Reviews = () => {
     const handlePageChange = async (page, rowsPerPage) => {
         setLoading(true);
         setCurrentPage(page);
-        const response = await axiosInstance.get(`/reviews/seller/${user?.idSeller}?page=${page}&limit=${rowsPerPage}`);
+        const response = await axiosInstance.get(`/reviews/seller/${seller?.id}?page=${page}&limit=${rowsPerPage}`);
         setReviews(response.data.data);
         setLoading(false);
     };
@@ -55,6 +60,10 @@ const Reviews = () => {
     return (
         <AdminLayout>
             <div className="p-6 bg-gray-100 min-h-screen">
+                {loading ? (
+                    <div className="flex justify-center items-center h-96"><Spinner /></div>
+                ) : (
+                <>
                 <div className="mb-4 flex justify-between items-center">
                     <h1 className="text-2xl font-semibold">Reviews</h1>
                     <input
@@ -129,14 +138,7 @@ const Reviews = () => {
                         Next
                     </button>
                 </div>
-                {loading && (
-                    <div className="absolute top-0 left-0 flex justify-center items-center h-screen w-full bg-white">
-                        <div className="flex flex-row gap-2">
-                            <div className="w-4 h-4 rounded-full bg-black animate-bounce"></div>
-                            <div className="w-4 h-4 rounded-full bg-black animate-bounce [animation-delay:-.3s]"></div>
-                            <div className="w-4 h-4 rounded-full bg-black animate-bounce [animation-delay:-.5s]"></div>
-                        </div>
-                    </div>
+                </>
                 )}
             </div>
         </AdminLayout>

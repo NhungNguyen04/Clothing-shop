@@ -48,7 +48,7 @@ export default function Header() {
           {/* Dropdown */}
           {isDropdownOpen && (
             <div className="absolute right-0 mt-2 w-48 bg-white border rounded-lg shadow-lg py-2">
-              <button className="w-full flex items-center px-4 py-2 hover:bg-gray-100">
+              <button className="w-full flex items-center px-4 py-2 hover:bg-gray-100" onClick={() => navigate('/seller/settings')}>
                 <FaUserEdit className="mr-2 text-gray-600" />
                 Edit Profile
               </button>
