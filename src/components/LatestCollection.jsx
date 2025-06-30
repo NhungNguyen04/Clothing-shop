@@ -1,9 +1,22 @@
+import { useEffect } from 'react';
 import Title from './Title';
 import ProductItem from './ProductItem';
 import { useProductStore } from '../store/ProductStore';
 
 const LatestCollection = () => {
-  const { recentProducts, isLoading } = useProductStore();
+  const { recentProducts, isLoading, fetchProducts, fetchRecentProducts } = useProductStore();
+  
+  useEffect(() => {
+    // First fetch all products if not loaded, then fetch recent products
+    const loadData = async () => {
+      await fetchProducts();
+      await fetchRecentProducts();
+    };
+    
+    if (!recentProducts) {
+      loadData();
+    }
+  }, [recentProducts, fetchProducts, fetchRecentProducts]);
   
   return (
     <div className='my-10'>

@@ -34,9 +34,7 @@ import PaymentFailure from './pages/PaymentFailure';
 import AccountPage from './pages/Admin/Accounts';
 import Reviews from './pages/Admin/Reviews';
 import AdminSettings from './pages/Admin/Settings';
-import Seller from './pages/Seller/Seller';
 import SellerDashboard from './pages/Seller/SellerDashboard';
-import SellerTransactions from './pages/Seller/Transactions';
 import SellerSettings from './pages/Seller/Settings';
 import SellerChats from './pages/Seller/SellerChats';
 import SellerChat from './pages/Seller/SellerChat';
@@ -45,6 +43,9 @@ import SellerPage from './pages/SellerPage';
 import SellerRegister from './pages/SellerRegister';
 import Chat from './pages/Chat';
 import Chats from './pages/Chats';
+import Notification from './pages/Notification';
+import SellerOwnProfile from './pages/Seller/SellerProfile';
+import AdminProfile from './pages/Admin/AdminProfile';
 
 function App() {
   const location = useLocation();
@@ -81,6 +82,7 @@ function App() {
         <Route path="/payment-failure" element={<PaymentFailure />} />
         <Route path="/chat/:conversationId" element={<Chat />} />
         <Route path="/chats" element={<Chats />} />
+        <Route path="/notification" element={ <Notification/>} />
 
         {/* Admin Routes */}
         <Route path="/admin/dashboard" element={isAdmin ? <Dashboard /> : <Navigate to="/" />} />
@@ -94,17 +96,17 @@ function App() {
         <Route path="/admin/admin-accounts" element={isAdmin ? <AccountPage type="admin" /> : <Navigate to="/" />} />
         <Route path="/admin/reviews" element={isAdmin ? <Reviews /> : <Navigate to="/" />} />
         <Route path="/admin/settings" element={isAdmin ? <AdminSettings /> : <Navigate to="/" />} />
+        <Route path="/admin/profile" element={isAdmin ? <AdminProfile /> : <Navigate to="/" />} />
 
         {/* Seller Routes */}
-        <Route path="/seller" element={isSeller ? <Seller /> : <Navigate to="/" />} />
         <Route path="/seller/products" element={isSeller ? <ProductList /> : <Navigate to="/" />} />
         <Route path="/seller/orders" element={isSeller ? <OrderList /> : <Navigate to="/" />} />
         <Route path="/seller/reviews" element={isSeller ? <Reviews /> : <Navigate to="/" />} />
         <Route path="/seller/dashboard" element={isSeller ? <SellerDashboard /> : <Navigate to="/" />} />
-        <Route path="/seller/transactions" element={isSeller ? <SellerTransactions /> : <Navigate to="/" />} />
         <Route path="/seller/settings" element={isSeller ? <SellerSettings /> : <Navigate to="/" />} />
         <Route path="/seller/chats" element={isSeller ? <SellerChats /> : <Navigate to="/" />} />
         <Route path="/seller/chat/:conversationId" element={isSeller ? <SellerChat /> : <Navigate to="/" />} />
+        <Route path="/seller/profile" element={isSeller ? <SellerOwnProfile /> : <Navigate to="/" />} />
 
       </Routes>
       {(!isAdminRoute && !isSellerRoute) && <Footer />}

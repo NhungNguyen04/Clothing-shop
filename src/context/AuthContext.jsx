@@ -55,7 +55,7 @@ export const AuthProvider = ({ children }) => {
         setSeller(response.data.seller);
 
         if (response.data.seller.status === "APPROVED") {
-          navigate("/seller");
+          navigate("/seller/dashboard");
         }
       } else {
         setSeller(null);
@@ -68,7 +68,7 @@ export const AuthProvider = ({ children }) => {
   const handleAdminRedirect = (user) => {
     if (user.role === 'ADMIN') {
       setTimeout(() => {
-        navigate('/(authenticated)/admin/(tabs)', { replace: true });
+        navigate('/admin/dashboard', { replace: true });
       }, 100);
     }
   };

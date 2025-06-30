@@ -14,6 +14,7 @@ const menuItems = {
         { name: "Admin Account", link: "/admin/admin-accounts" }
       ] },
     { name: "Reviews", icon: <FaStar />, link: "/admin/reviews" },
+    { name: "Profile", icon: <FaUser />, link: "/admin/profile" },
   ],
   seller: [
     { name: "Dashboard", icon: <FaHome />, link: "/seller/dashboard" },
@@ -21,6 +22,7 @@ const menuItems = {
     { name: "Orders", icon: <FaShoppingCart />, link: "/seller/orders" },
     { name: "Chats", icon: <FaComment />, link: "/seller/chats" },
     { name: "Reviews", icon: <FaStar />, link: "/seller/reviews" },
+    { name: "Profile", icon: <FaUser />, link: "/seller/profile" },
   ]
 };
 

@@ -63,10 +63,23 @@ export const useProductStore = create<ProductState>((set, get) => ({
   fetchRecentProducts: async () => {
     set({ isLoading: true, error: null });
     try {
-      const recentProducts = (get().products?.sort((a, b) => {
-        return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
-      }) || null)?.slice(0,10); // Assuming the first 5 products are the most recent
-      set({ recentProducts, isLoading: false });
+      const products = get().products;
+      if (!products) {
+        // If products are not loaded, fetch them first
+        await get().fetchProducts();
+        const updatedProducts = get().products;
+        if (updatedProducts) {
+          const recentProducts = [...updatedProducts]
+            .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+            .slice(0, 10);
+          set({ recentProducts, isLoading: false });
+        }
+      } else {
+        const recentProducts = [...products]
+          .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+          .slice(0, 10);
+        set({ recentProducts, isLoading: false });
+      }
     } catch (error) {
       set({ error: error instanceof Error ? error.message : "An unknown error occurred", isLoading: false });
     }

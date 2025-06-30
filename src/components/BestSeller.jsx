@@ -4,8 +4,15 @@ import ProductItem from './ProductItem';
 import { useProductStore } from '../store/ProductStore';
 
 const BestSeller = () => {
-  const { products, isLoading } = useProductStore();
+  const { products, isLoading, fetchProducts } = useProductStore();
   const [bestSeller, setBestSeller] = useState([]);
+  
+  useEffect(() => {
+    // Fetch products if not already loaded
+    if (!products) {
+      fetchProducts();
+    }
+  }, [products, fetchProducts]);
   
   useEffect(() => {
     if (products && products.length > 0) {

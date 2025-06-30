@@ -7,15 +7,6 @@ import OurPolicies from '../components/OurPolicies'
 import NewsLetterBox from '../components/NewsLetterBox'
 
 const Home = () => {
-  const navigate = useNavigate();
-  useEffect(() => {
-    const user = JSON.parse(localStorage.getItem('user'));
-    if (user?.role === 'ADMIN') {
-      navigate('/admin/dashboard', { replace: true });
-    } else if (user?.role === 'SELLER') {
-      navigate('/seller/dashboard', { replace: true });
-    }
-  }, [navigate]);
 
   return (
     <div>

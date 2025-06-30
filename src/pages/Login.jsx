@@ -23,7 +23,11 @@ const Login = () => {
       // Use the login function from AuthContext
       await login(response.data);
       
-      navigate("/");
+      if (response.data.role === "ADMIN") {
+        navigate("/admin/dashboard", { replace: true });
+      } else if (response.data.role === "SELLER" && response.data.seller.status === "APPROVED") {
+        navigate("/seller/dashboard", { replace: true });
+      }
     } catch (error) {
       toast.error("Đăng nhập thất bại. Vui lòng thử lại!");
       console.error("Login failed:", error.response?.data || error.message);
