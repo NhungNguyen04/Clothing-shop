@@ -12,18 +12,35 @@ function AuthSuccess() {
   const { login } = useAuth();
 
   useEffect(() => {
-    // Log all URL parameters for debugging
-    const allParams = {};
-    const params = new URLSearchParams(window.location.search);
-    params.forEach((value, key) => {
-      allParams[key] = value;
-    });
+    // Prevent multiple executions
+    let isProcessing = false;
     
-    console.log("Auth success page loaded with URL params:", allParams);
-    setDebugInfo(prev => ({ ...prev, urlParams: allParams }));
+    // Add a timeout to prevent infinite loading
+    const timeoutId = setTimeout(() => {
+      if (loading) {
+        console.log("Authentication timeout - taking too long");
+        setError("Authentication timeout - please try again");
+        setLoading(false);
+        toast.error("Authentication took too long - please try again");
+        navigate('/login', { replace: true });
+      }
+    }, 15000); // 15 second timeout
     
     const processAuth = async () => {
+      if (isProcessing) return;
+      isProcessing = true;
+      
       try {
+        // Log all URL parameters for debugging
+        const allParams = {};
+        const params = new URLSearchParams(window.location.search);
+        params.forEach((value, key) => {
+          allParams[key] = value;
+        });
+        
+        console.log("Auth success page loaded with URL params:", allParams);
+        setDebugInfo(prev => ({ ...prev, urlParams: allParams }));
+        
         // Get the token from URL query parameters
         const token = params.get('token');
         
@@ -69,21 +86,26 @@ function AuthSuccess() {
             access_token: token
           });
           
+          console.log("Login result:", loginResult);
           setDebugInfo(prev => ({ ...prev, loginResult }));
 
-          if (loginResult?.success) {
-            toast.success("Successfully authenticated with Google");
-            navigate('/');
-          } else {
-            throw new Error(loginResult?.error || "Login failed");
+          // Check if login was successful (AuthContext login returns { success: true/false })
+          if (loginResult && loginResult.success === false) {
+            throw new Error(loginResult.error || "Login failed");
           }
+          
+          // If we get here, login was successful
+          toast.success("Successfully authenticated with Google");
+          // Clear the URL parameters to prevent re-processing
+          window.history.replaceState({}, document.title, window.location.pathname);
+          navigate('/', { replace: true });
         } catch (decodingError) {
           console.error("Error decoding token:", decodingError);
           setError("Failed to decode authentication token");
           setDebugInfo(prev => ({ ...prev, decodingError: decodingError.message }));
           
           toast.error("Authentication error: Invalid token format");
-          setTimeout(() => navigate('/login'), 3000);
+          setTimeout(() => navigate('/login', { replace: true }), 3000);
         }
       } catch (error) {
         console.error("Authentication error:", error);
@@ -91,31 +113,67 @@ function AuthSuccess() {
         setDebugInfo(prev => ({ ...prev, errorDetails: error.message }));
         
         toast.error(`Authentication error: ${error.message}`);
-        setTimeout(() => navigate('/login'), 3000);
+        setTimeout(() => navigate('/login', { replace: true }), 3000);
       } finally {
         setLoading(false);
+        clearTimeout(timeoutId);
       }
     };
 
     processAuth();
-  }, [navigate, login]);
+    
+    // Cleanup timeout on unmount
+    return () => {
+      clearTimeout(timeoutId);
+    };
+  }, []); // Empty dependency array to run only once
 
-  // Function to parse JWT token
+  // Function to parse JWT token with better error handling
   const parseJwt = (token) => {
     try {
-      const base64Url = token.split('.')[1];
+      if (!token || typeof token !== 'string') {
+        throw new Error('Token is not a valid string');
+      }
+      
+      const parts = token.split('.');
+      if (parts.length !== 3) {
+        throw new Error(`Token must have 3 parts, but has ${parts.length}`);
+      }
+      
+      const base64Url = parts[1];
+      if (!base64Url) {
+        throw new Error('Token payload part is empty');
+      }
+      
       const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
-      const jsonPayload = decodeURIComponent(
-        window.atob(base64)
-          .split('')
-          .map(c => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2))
-          .join('')
-      );
+      
+      let jsonPayload;
+      try {
+        jsonPayload = decodeURIComponent(
+          window.atob(base64)
+            .split('')
+            .map(c => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2))
+            .join('')
+        );
+      } catch (decodeError) {
+        console.error('Base64 decode error:', decodeError);
+        throw new Error('Failed to decode token payload');
+      }
 
-      return JSON.parse(jsonPayload);
+      let parsed;
+      try {
+        parsed = JSON.parse(jsonPayload);
+      } catch (parseError) {
+        console.error('JSON parse error:', parseError);
+        throw new Error('Token payload is not valid JSON');
+      }
+      
+      console.log('Successfully parsed JWT payload:', parsed);
+      return parsed;
     } catch (error) {
       console.error("Error parsing JWT token:", error);
-      throw new Error("Invalid token format");
+      console.error("Token:", token);
+      throw new Error(`Invalid token format: ${error.message}`);
     }
   };
 

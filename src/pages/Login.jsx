@@ -10,6 +10,7 @@ import { AuthService } from "../services/oauth";
 const Login = () => {
   const { register, handleSubmit, formState: { errors } } = useForm();
   const [loading, setLoading] = useState(false);
+  const [googleLoading, setGoogleLoading] = useState(false);
   const navigate = useNavigate();
   const { login } = useAuth();
 
@@ -32,15 +33,19 @@ const Login = () => {
   };
 
   const handleGoogleLogin = async () => {
+    setGoogleLoading(true);
     try {
       const result = await AuthService.loginWithGoogle();
       
       if (!result.success) {
         toast.error(result.error || "Failed to open Google login");
+        setGoogleLoading(false);
       }
+      // Don't set loading to false here since we're redirecting
     } catch (error) {
       console.error('Google sign in error:', error);
       toast.error('Failed to sign in with Google');
+      setGoogleLoading(false);
     }
   };
 
@@ -75,10 +80,20 @@ const Login = () => {
         <button 
           type="button"
           onClick={handleGoogleLogin}
-          className="w-full border border-gray-400 py-3 rounded flex items-center justify-center gap-2 hover:bg-gray-100 transition-colors"
+          disabled={googleLoading || loading}
+          className="w-full border border-gray-400 py-3 rounded flex items-center justify-center gap-2 hover:bg-gray-100 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
         >
-          <FcGoogle/>
-          Login with Google
+          {googleLoading ? (
+            <>
+              <div className="animate-spin rounded-full h-4 w-4 border-t-2 border-b-2 border-gray-900"></div>
+              Redirecting to Google...
+            </>
+          ) : (
+            <>
+              <FcGoogle/>
+              Login with Google
+            </>
+          )}
         </button>
       </form>
     </div>

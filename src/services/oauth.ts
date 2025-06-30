@@ -14,15 +14,27 @@ export class AuthService {
       // For web, we'll redirect directly to Google auth endpoint
       // The backend will redirect back to our auth-success page
       
-      // According to backend controller, we need:
-      // 1. platform=web parameter
-      // 2. redirect_uri parameter (not return_to)
-      const redirectUri = `${window.location.origin}/auth-success`;
+      // Determine the correct redirect URI based on environment
+      let redirectUri: string;
+      
+      // Check if we're in production (netlify) or development
+      if (window.location.hostname === 'nh-clothing.netlify.app') {
+        redirectUri = 'https://nh-clothing.netlify.app/auth-success';
+      } else if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+        redirectUri = `${window.location.origin}/auth-success`;
+      } else {
+        // Fallback to current origin
+        redirectUri = `${window.location.origin}/auth-success`;
+      }
+      
       console.log("Redirect URI:", redirectUri);
       
       // Build the URL with the correct parameters as expected by the backend
       const authUrl = `${API_URL}/auth/google?platform=web&redirect_uri=${encodeURIComponent(redirectUri)}`;
       console.log("Auth URL:", authUrl);
+      
+      // Add a small delay to ensure the UI updates before redirect
+      await new Promise(resolve => setTimeout(resolve, 100));
       
       // Redirect the user to Google OAuth
       window.location.href = authUrl;
