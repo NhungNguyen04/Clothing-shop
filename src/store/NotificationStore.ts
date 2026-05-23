@@ -1,6 +1,5 @@
 import { create } from "zustand";
 import {
-  AppNotification,
   getNotifications,
   getUnreadNotifications,
   getNotificationCount,
@@ -9,6 +8,7 @@ import {
   deleteNotificationApi,
   deleteAllNotificationApi,
 } from "../services/notifications";
+import type { AppNotification } from "../services/notifications";
 
 import { useAuthStore } from "./AuthStore";
 

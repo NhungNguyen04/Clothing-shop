@@ -1,12 +1,10 @@
 import { create } from "zustand";
 import {
   UserService,
-  UpdateUserData,
-  Address,
   formatFullAddress,
   normalizeAddress,
-  User,
 } from "../services/user";
+import type { User, UpdateUserData, Address } from "../services/user";
 import { useAuthStore } from "./AuthStore";
 
 interface UserState {
@@ -117,7 +115,7 @@ export const useUserStore = create<UserState>((set, get) => ({
 
       if (addresses.length > 0) {
         set({
-          currentAddress: addresses[0],
+          currentAddress: addresses[0] || null,
           isLoading: false,
         });
         return addresses[0];

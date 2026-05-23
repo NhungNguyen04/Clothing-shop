@@ -1,7 +1,7 @@
 import axios from "axios";
 
 const getBaseUrl = () => {
-  return "https://clothing-shop-be-5eol.onrender.com"
+  return "http://[::1]:3300"
 
 };
 

@@ -1,4 +1,4 @@
-import axiosInstance from './axiosInstance';
+import axiosInstance from '../api/axiosInstance';
 
 // Types based on backend schemas
 export interface Address {

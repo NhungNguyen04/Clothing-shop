@@ -8,7 +8,7 @@ import { toast } from 'react-toastify';
 import paymentService from "../services/payment";
 import addressService from "../services/address";
 import { useOrderStore } from "../store/OrderStore";
-import axiosInstance from "../services/axiosInstance";
+import axiosInstance from "../api/axiosInstance";
 
 const CheckOut = () => {
     const { cartId } = useParams();

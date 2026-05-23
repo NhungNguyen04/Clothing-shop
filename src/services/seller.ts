@@ -1,6 +1,6 @@
-import axiosInstance from './axiosInstance';
-import { Product } from './product';
-import { User, Address } from './user';
+import axiosInstance from '../api/axiosInstance';
+import type { Product } from './product';
+import type { User, Address } from './user';
 
 // Define schema types locally since they're from backend
 interface AddressInfo extends Address {

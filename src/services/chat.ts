@@ -1,6 +1,6 @@
-import axiosInstance from './axiosInstance';
-import { Seller } from './seller';
-import { User } from './user';
+import axiosInstance from '../api/axiosInstance';
+import type { Seller } from './seller';
+import type { User } from './user';
 import { io, Socket } from 'socket.io-client';
 
 // Types for conversations and messages

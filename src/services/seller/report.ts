@@ -1,4 +1,4 @@
-import axiosInstance from "../axiosInstance";
+import axiosInstance from "../../api/axiosInstance";
 
 // Interfaces for API responses
 export interface DashboardSummary {

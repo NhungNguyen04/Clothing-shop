@@ -1,6 +1,6 @@
 // Product.ts - Types and API functions for products
 
-import axiosInstance from "./axiosInstance";
+import axiosInstance from '../api/axiosInstance';
 
 // Define the types based on the API response
 

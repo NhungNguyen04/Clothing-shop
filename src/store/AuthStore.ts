@@ -1,6 +1,7 @@
 import { create } from 'zustand';
-import { User, UserService, UpdateUserData } from '../services/user';
-import { Seller } from '../services/seller'
+import { UserService } from '../services/user';
+import type { User, UpdateUserData } from '../services/user';
+import type { Seller } from '../services/seller'
 
 interface AuthState {
   user: User | null;

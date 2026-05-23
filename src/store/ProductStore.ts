@@ -1,5 +1,6 @@
-import { fetchAllProducts, Product } from "../services/product";
-import { SizeStock } from "../services/product";
+import { fetchAllProducts } from "../services/product";
+import type { Product } from  "../services/product";
+import type { SizeStock } from "../services/product";
 import { create } from "zustand";
 
 interface ProductState {
@@ -122,7 +123,7 @@ export const useProductStore = create<ProductState>((set, get) => ({
   },
   clearError: () => set({ error: null }),
   getProductMainImage: (product: Product): string => {
-    return product.image && product.image.length > 0 
+    return product.image[0] && product.image.length > 0 
       ? product.image[0] 
       : 'https://via.placeholder.com/300x400';
   },

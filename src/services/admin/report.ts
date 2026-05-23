@@ -1,4 +1,4 @@
-import axiosInstance from '../axiosInstance';
+import axiosInstance from '../../api/axiosInstance';
 
 // Sales Report Interfaces
 export interface SalesReport {

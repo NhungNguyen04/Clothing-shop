@@ -1,6 +1,6 @@
-import { User } from './user';
-import axiosInstance from './axiosInstance';
-import { Seller, SizeStock } from './product';
+import type { User } from './user';
+import axiosInstance from '../api/axiosInstance';
+import type { Seller, SizeStock } from './product';
 
 /**
  * Order status options

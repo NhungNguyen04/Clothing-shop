@@ -1,6 +1,6 @@
 import { create } from 'zustand';
-import { 
-  OrderService, Order, ApiResponse, OrderStatus, 
+import { OrderService } from '../services/order';
+import type { Order, ApiResponse, OrderStatus, 
   CartToOrderInput, UpdateOrderInput
 } from '../services/order';
 import { useCartStore } from './CartStore';
@@ -103,11 +103,6 @@ export const useOrderStore = create<OrderState>((set, get) => ({
     postalCode?: string,
     paymentMethod: 'COD' | 'VIETQR' | 'VNPAY' = 'COD'
   ): Promise<ApiResponse<Order[]>> => {
-    console.log('Starting checkout process...');
-    console.log('Address:', address);
-    console.log('Phone Number:', phoneNumber);
-    console.log('Postal Code:', postalCode);
-    console.log('Payment Method:', paymentMethod);
     set({ isLoading: true, error: null });
     
     try {

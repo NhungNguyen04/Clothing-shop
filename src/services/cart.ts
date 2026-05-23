@@ -1,5 +1,5 @@
-import axiosInstance from "./axiosInstance";
-import { SizeStock } from "./product";
+import axiosInstance from '../api/axiosInstance';
+import type { SizeStock } from "./product";
 import { useAuthStore } from "../store/AuthStore";
 
 // Define all the types that represent our cart data structure

@@ -1,4 +1,4 @@
-import axiosInstance from "./axiosInstance";
+import axiosInstance from '../api/axiosInstance';
 import { useAuthStore } from "../store/AuthStore"; // Import for getting the user ID
 
 export interface AppNotification {

@@ -1,4 +1,4 @@
-import axiosInstance from './axiosInstance';
+import axiosInstance from '../api/axiosInstance';
 import { useAuthStore } from '../store/AuthStore';
 
 // Address type to match backend schema with standardized fields

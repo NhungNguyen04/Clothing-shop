@@ -1,5 +1,5 @@
-import axiosInstance from "../axiosInstance";
-import { ApiResponse, Product, SizeStock } from "../product";
+import axiosInstance from "../../api/axiosInstance";
+import type { ApiResponse, Product } from "../product";
 
 // Define specific types for seller product operations
 export interface CreateProductData {

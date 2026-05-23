@@ -1,5 +1,6 @@
 import { create } from 'zustand'
-import { Cart, CartItem, SellerItems, getCartByUserId, addToCart, updateCartItemQuantity, removeCartItem, removeItemsBySeller } from '../services/cart'
+import type { Cart, CartItem, SellerItems} from '../services/cart'
+import { getCartByUserId, addToCart, updateCartItemQuantity, removeCartItem, removeItemsBySeller } from '../services/cart'
 import { useProductStore } from './ProductStore'
 import { useAuthStore } from './AuthStore'
 
@@ -55,13 +56,13 @@ export const useCartStore = create<CartState>((set, get) => ({
       const totalValue = items.reduce((sum, item) => sum + item.totalPrice, 0);
       
       // Fix the seller name access - use fallbacks to ensure we always have a name
-      const product = items[0].sizeStock.product;
+      const product = items[0]?.sizeStock.product ?? null;
       let sellerName = 'Unknown Seller';
       
       // Try different ways to get the seller name
-      if (product.sellerName) {
+      if (product?.sellerName) {
         sellerName = product.sellerName;
-      } else if (product.seller && product.seller.managerName) {
+      } else if (product?.seller && product.seller.managerName) {
         sellerName = product.seller.managerName;
       }
       
