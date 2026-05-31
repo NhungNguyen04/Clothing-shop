@@ -1,17 +1,16 @@
 import React, { useState } from 'react';
 
 const UploadPhoto = ({ onUpload }) => {
-  const [selectedFile, setSelectedFile] = useState(null);
   const [preview, setPreview] = useState(null);
 
   const handleFileSelect = (e) => {
     const file = e.target.files[0];
     if (file && file.type.startsWith('image/')) {
-      setSelectedFile(file);
       const reader = new FileReader();
       reader.onloadend = () => {
-        setPreview(reader.result);
-        onUpload && onUpload(reader.result); // Pass preview URL immediately
+        const previewUrl = reader.result;
+        setPreview(previewUrl);
+        onUpload && onUpload({ file, previewUrl });
       };
       reader.readAsDataURL(file);
     }

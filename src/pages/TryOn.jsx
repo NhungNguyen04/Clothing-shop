@@ -1,26 +1,33 @@
-import React, { useEffect, useState, useContext } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
-import { ShopContext } from '../context/ShopContext';
 import UploadPhoto from '../components/UploadPhoto';
 import '../styles/TryOn.css';
+import { generateTryOnImage, uploadTryOnImage } from '../services/tryOn';
+import { fetchProductById } from '../services/product';
 
 const TryOn = () => {
   const { productId } = useParams();
   const [image, setImage] = useState('');
-  const [userPhoto, setUserPhoto] = useState(null);
-  const { products } = useContext(ShopContext);
+  const [userPhotoPreview, setUserPhotoPreview] = useState(null);
+  const [userPhotoFile, setUserPhotoFile] = useState(null);
+  const [personImageUrl, setPersonImageUrl] = useState('');
+  const [photoHistory, setPhotoHistory] = useState([]);
+  const [selectedHistoryUrl, setSelectedHistoryUrl] = useState('');
+  const [generatedImage, setGeneratedImage] = useState(null);
+  const [isGenerating, setIsGenerating] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const historyStorageKey = 'tryOnPhotoHistory';
 
   const fetchProductData = async () => {
     setLoading(true);
     try {
-      const foundProduct = products.find(item => item._id === productId);
-      if (foundProduct) {
-        setImage(foundProduct.image[0]);
-      } else {
+      const product = await fetchProductById(productId);
+      if (!product) {
         setError('Product not found');
+        return;
       }
+      setImage(product.image?.[0] || '');
     } catch (err) {
       setError('Failed to load product');
     } finally {
@@ -30,20 +37,76 @@ const TryOn = () => {
 
   useEffect(() => {
     fetchProductData();
-  }, [products, productId]);
+  }, [productId]);
 
-  const handlePhotoUpload = (previewUrl) => {
-    setUserPhoto(previewUrl); // Now directly using the preview URL
+  useEffect(() => {
+    try {
+      const stored = localStorage.getItem(historyStorageKey);
+      const parsed = stored ? JSON.parse(stored) : [];
+      if (Array.isArray(parsed)) {
+        setPhotoHistory(parsed.filter((url) => typeof url === 'string' && url.trim() !== ''));
+      }
+    } catch (err) {
+      setPhotoHistory([]);
+    }
+  }, []);
+
+  const handlePhotoUpload = ({ file, previewUrl }) => {
+    setUserPhotoFile(file);
+    setUserPhotoPreview(previewUrl);
+    setPersonImageUrl('');
+    setSelectedHistoryUrl('');
+    setGeneratedImage(null);
+  };
+
+  const handleHistorySelect = (url) => {
+    setUserPhotoFile(null);
+    setPersonImageUrl(url);
+    setUserPhotoPreview(url);
+    setSelectedHistoryUrl(url);
+    setGeneratedImage(null);
+  };
+
+  const addPhotoToHistory = (url) => {
+    setPhotoHistory((prev) => {
+      const next = [url, ...prev.filter((item) => item !== url)].slice(0, 6);
+      localStorage.setItem(historyStorageKey, JSON.stringify(next));
+      return next;
+    });
   };
 
   const handleGenerate = async () => {
-    if (!userPhoto || !image) return;
-    
+    if (!image) {
+      setError('Please select a product.');
+      return;
+    }
+
+    if (!userPhotoFile && !personImageUrl) {
+      setError('Please upload a photo or select a previous upload.');
+      return;
+    }
+
+    setError(null);
+    setIsGenerating(true);
     try {
-      // Add your AI generation logic here
-      console.log('Generating try-on image...');
-    } catch (error) {
-      console.error('Generation failed:', error);
+      let resolvedPersonUrl = personImageUrl;
+      if (userPhotoFile) {
+        resolvedPersonUrl = await uploadTryOnImage(userPhotoFile);
+        addPhotoToHistory(resolvedPersonUrl);
+        setPersonImageUrl(resolvedPersonUrl);
+      }
+
+      const resultUrl = await generateTryOnImage({
+        personImageUrl: resolvedPersonUrl,
+        productImageUrl: image,
+      });
+
+      setGeneratedImage(resultUrl);
+    } catch (err) {
+      console.error('Generation failed:', err);
+      setError('Try-on generation failed. Please try again.');
+    } finally {
+      setIsGenerating(false);
     }
   };
 
@@ -66,21 +129,48 @@ const TryOn = () => {
             <h3>Your Photo</h3>
             <div className="upload-wrapper">
               <UploadPhoto onUpload={handlePhotoUpload} />
-              {userPhoto && (
+              {userPhotoPreview && (
                 <div className="preview-wrapper">
-                  <img src={userPhoto} alt="Your uploaded photo" className="user-image" />
+                  <img src={userPhotoPreview} alt="Your uploaded photo" className="user-image" />
+                </div>
+              )}
+              {photoHistory.length > 0 && (
+                <div className="history-section">
+                  <p className="history-title">Or pick a previous upload</p>
+                  <div className="history-grid">
+                    {photoHistory.map((url) => (
+                      <button
+                        key={url}
+                        type="button"
+                        className={`history-button ${selectedHistoryUrl === url ? 'is-selected' : ''}`}
+                        onClick={() => handleHistorySelect(url)}
+                      >
+                        <img src={url} alt="Previous upload" className="history-image" />
+                      </button>
+                    ))}
+                  </div>
                 </div>
               )}
             </div>
           </div>
         </div>
 
+        {generatedImage && (
+          <div className="generated-section">
+            <h3>Try-On Result</h3>
+            <div className="image-wrapper">
+              <img src={generatedImage} alt="Try-on result" className="product-image" />
+            </div>
+          </div>
+        )}
+
         <div className="action-section">
           <button 
             className="generate-button"
             onClick={handleGenerate}
+            disabled={isGenerating}
           >
-            Try It On!
+            {isGenerating ? 'Generating...' : 'Try It On!'}
           </button>
         </div>
       </div>
