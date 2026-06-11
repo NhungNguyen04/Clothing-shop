@@ -14,8 +14,4 @@ README.md
 coverage
 .nyc_output
 test
-eslint.config.js
-postcss.config.js
-tailwind.config.js
-vite.config.js
 netlify.toml
