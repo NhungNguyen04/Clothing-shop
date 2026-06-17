@@ -140,7 +140,6 @@ const Orders = () => {
           <Spinner />
         </div>      ) : orders.length === 0 ? (
         <div className="text-center text-gray-500 py-12 bg-gray-50 rounded-lg">
-          <div className="text-5xl mb-4">📦</div>
           <h3 className="text-xl font-medium mb-2">No orders found</h3>
           <p>You haven't placed any orders yet.</p>
           <button 

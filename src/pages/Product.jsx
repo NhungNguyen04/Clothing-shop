@@ -513,7 +513,7 @@ const Product = () => {
               onClick={() => navigate(`/try-on/${productId}`)}
                 className="w-full bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white font-semibold py-3 px-6 rounded-lg transition-all transform hover:scale-105"
             >
-                Try on with AI ✨
+                Try on with AI 
             </button>
           </div>
         </div>

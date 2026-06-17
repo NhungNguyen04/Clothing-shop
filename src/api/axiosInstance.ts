@@ -2,7 +2,7 @@ import axios from "axios";
 
 const getBaseUrl = () => {
   // cast import.meta to any to avoid TypeScript "Property 'env' does not exist on type 'ImportMeta'" error
-  return (import.meta as any).env?.VITE_API_URL || "http://localhost:3000";
+  return (import.meta as any).env?.VITE_API_URL || "/api";
 };
 
 const axiosInstance = axios.create({

@@ -115,13 +115,6 @@ export const getLastMessage = async (conversationId: string): Promise<Message | 
   }
 };
 
-// Get WebSocket base URL from the axiosInstance base URL
-const getWebSocketUrl = () => {
-  const baseUrl = axiosInstance.defaults.baseURL || '';
-  // Replace http(s):// with ws(s)://
-  return baseUrl.replace(/^http(s)?:\/\//, 'ws$1://') + '/chat';
-};
-
 // WebSocket implementation for real-time messaging
 export class ChatWebSocket {
   private socket: Socket | null = null;
@@ -134,11 +127,18 @@ export class ChatWebSocket {
   }
 
   connect(): void {
-    const wsUrl = axiosInstance.defaults.baseURL?.replace(/^http(s)?:\/\//, '') || '';
+    const baseUrl = axiosInstance.defaults.baseURL || '';
+    const socketBaseUrl = baseUrl.startsWith('http')
+      ? baseUrl
+      : window.location.origin;
+    const socketPath = baseUrl.startsWith('/')
+      ? `${baseUrl.replace(/\/$/, '')}/socket.io`
+      : '/socket.io';
     
-    this.socket = io(`http://${wsUrl}`, { // Kết nối đến root namespace
+    this.socket = io(socketBaseUrl, { // Kết nối đến root namespace
       query: { userId: this.userId },
       transports: ['websocket'],
+      path: socketPath,
     });
 
     this.socket.on('connect', () => {
