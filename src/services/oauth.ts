@@ -1,7 +1,7 @@
 // Web version of OAuth service for handling Google authentication
 import axiosInstance from '../api/axiosInstance';
 
-const API_URL = "https://clothing-shop-be-5eol.onrender.com";
+const API_URL = "https://nh-clothing.xyz";
 
 export class AuthService {
   /**
@@ -17,9 +17,9 @@ export class AuthService {
       // Determine the correct redirect URI based on environment
       let redirectUri: string;
       
-      // Check if we're in production (netlify) or development
-      if (window.location.hostname === 'nh-clothing.netlify.app') {
-        redirectUri = 'https://nh-clothing.netlify.app/auth-success';
+      // Check if we're in production or development
+      if (window.location.hostname === 'nh-clothing.xyz') {
+        redirectUri = 'https://nh-clothing.xyz/auth-success';
       } else if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
         redirectUri = `${window.location.origin}/auth-success`;
       } else {
