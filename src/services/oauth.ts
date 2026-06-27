@@ -30,7 +30,7 @@ export class AuthService {
       console.log("Redirect URI:", redirectUri);
       
       // Build the URL with the correct parameters as expected by the backend
-      const authUrl = `${API_URL}/auth/google?platform=web&redirect_uri=${encodeURIComponent(redirectUri)}`;
+      const authUrl = `${API_URL}/api/auth/google?platform=web&redirect_uri=${encodeURIComponent(redirectUri)}`;
       console.log("Auth URL:", authUrl);
       
       // Add a small delay to ensure the UI updates before redirect

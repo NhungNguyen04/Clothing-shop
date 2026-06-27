@@ -8,25 +8,53 @@ import { useAuth } from "../context/AuthContext";
 import { AuthService } from "../services/oauth";
 
 const Login = () => {
-  const { register, handleSubmit, formState: { errors } } = useForm();
+  const {
+    register,
+    handleSubmit,
+    setValue,
+    formState: { errors },
+  } = useForm();
+
   const [loading, setLoading] = useState(false);
   const [googleLoading, setGoogleLoading] = useState(false);
   const navigate = useNavigate();
   const { login } = useAuth();
+
+  const quickCredentials = [
+    {
+      role: "Admin",
+      email: "newadmin@gmail.com",
+      password: "123123",
+    },
+    {
+      role: "Seller",
+      email: "nhung@gmail.com",
+      password: "123123",
+    },
+  ];
+
+  const fillCredentials = (email, password) => {
+    setValue("email", email);
+    setValue("password", password);
+  };
 
   const onSubmit = async (data) => {
     setLoading(true);
     try {
       const response = await axiosInstance.post("/auth/login", data);
       toast.success("Đăng nhập thành công");
-      
-      // Use the login function from AuthContext
+
       await login(response.data);
-      
+
       if (response.data.role === "ADMIN") {
         navigate("/admin/dashboard", { replace: true });
-      } else if (response.data.role === "SELLER" && response.data.seller.status === "APPROVED") {
+      } else if (
+        response.data.role === "SELLER" &&
+        response.data.seller?.status === "APPROVED"
+      ) {
         navigate("/seller/dashboard", { replace: true });
+      } else {
+        navigate("/", { replace: true });
       }
     } catch (error) {
       toast.error("Đăng nhập thất bại. Vui lòng thử lại!");
@@ -40,48 +68,94 @@ const Login = () => {
     setGoogleLoading(true);
     try {
       const result = await AuthService.loginWithGoogle();
-      
+
       if (!result.success) {
         toast.error(result.error || "Failed to open Google login");
         setGoogleLoading(false);
       }
-      // Don't set loading to false here since we're redirecting
     } catch (error) {
-      console.error('Google sign in error:', error);
-      toast.error('Failed to sign in with Google');
+      console.error("Google sign in error:", error);
+      toast.error("Failed to sign in with Google");
       setGoogleLoading(false);
     }
   };
 
   return (
     <div className="flex flex-col items-center mt-6 min-h-screen">
-      <h2 className="text-2xl text-[#414141] font-bold mb-6">Login <span className="text-gray-700">—</span></h2>
+      <h2 className="text-2xl text-[#414141] font-bold mb-6">
+        Login <span className="text-gray-700">—</span>
+      </h2>
+
       <form onSubmit={handleSubmit(onSubmit)} className="w-full max-w-sm">
-        <input 
-          type="email" 
-          placeholder="Email" 
-          {...register("email", { required: "Email is required" })} 
-          className="w-full border border-gray-400 p-3 rounded mb-2" 
-        />
-        {errors.email && <p className="text-red-500 text-sm mb-2">{errors.email.message}</p>}
+        <div className="mb-4 border border-gray-300 rounded-lg p-3 bg-gray-50">
+          <p className="font-semibold text-sm mb-2 text-gray-700">
+            Quick credentials
+          </p>
 
-        <input 
-          type="password" 
-          placeholder="Password" 
-          {...register("password", { required: "Password is required" })} 
-          className="w-full border border-gray-400 p-3 rounded mb-2" 
-        />
-        {errors.password && <p className="text-red-500 text-sm mb-2">{errors.password.message}</p>}
-
-        <div className="flex justify-between text-sm text-gray-600 mb-4">
-          <a href="#" className="hover:underline">Forgot your password?</a>
-          <a href="/register" className="hover:underline">Create account</a>
+          <div className="space-y-2">
+            {quickCredentials.map((account) => (
+              <button
+                key={account.role}
+                type="button"
+                onClick={() =>
+                  fillCredentials(account.email, account.password)
+                }
+                className="w-full text-left border border-gray-300 rounded p-2 hover:bg-gray-100"
+              >
+                <p className="font-medium">{account.role}</p>
+                <p className="text-sm text-gray-600">
+                  Email: {account.email}
+                </p>
+                <p className="text-sm text-gray-600">
+                  Password: {account.password}
+                </p>
+              </button>
+            ))}
+          </div>
         </div>
 
-        <button type="submit" className="w-full bg-black text-white py-3 rounded mb-4" disabled={loading}>
+        <input
+          type="email"
+          placeholder="Email"
+          {...register("email", { required: "Email is required" })}
+          className="w-full border border-gray-400 p-3 rounded mb-2"
+        />
+        {errors.email && (
+          <p className="text-red-500 text-sm mb-2">
+            {errors.email.message}
+          </p>
+        )}
+
+        <input
+          type="password"
+          placeholder="Password"
+          {...register("password", { required: "Password is required" })}
+          className="w-full border border-gray-400 p-3 rounded mb-2"
+        />
+        {errors.password && (
+          <p className="text-red-500 text-sm mb-2">
+            {errors.password.message}
+          </p>
+        )}
+
+        <div className="flex justify-between text-sm text-gray-600 mb-4">
+          <a href="#" className="hover:underline">
+            Forgot your password?
+          </a>
+          <a href="/register" className="hover:underline">
+            Create account
+          </a>
+        </div>
+
+        <button
+          type="submit"
+          className="w-full bg-black text-white py-3 rounded mb-4"
+          disabled={loading}
+        >
           {loading ? "Signing in..." : "Sign in"}
         </button>
-        <button 
+
+        <button
           type="button"
           onClick={handleGoogleLogin}
           disabled={googleLoading || loading}
@@ -94,7 +168,7 @@ const Login = () => {
             </>
           ) : (
             <>
-              <FcGoogle/>
+              <FcGoogle />
               Login with Google
             </>
           )}
