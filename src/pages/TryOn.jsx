@@ -110,6 +110,21 @@ const TryOn = () => {
     }
   };
 
+  const availableImages = [
+    'https://nh-clothing.s3.ap-southeast-2.amazonaws.com/1782579865544-a949e58edb214357f46ad70186cbcda2.jpg',
+    'https://nh-clothing.s3.ap-southeast-2.amazonaws.com/1782580022584-a75600a7b5978e53f6570f7f0478f755.jpg',
+    'https://nh-clothing.s3.ap-southeast-2.amazonaws.com/1782580208172-4a56553b1aa7187d22e2957fcc7e82b3.jpg',
+  ];
+
+  const handleAvailableImageSelect = (url) => {
+    setUserPhotoFile(null);
+    setPersonImageUrl(url);
+    setUserPhotoPreview(url);
+    setSelectedHistoryUrl(url);
+    setGeneratedImage(null);
+    setError(null);
+  };
+
   if (loading) return <div className="try-on-container">Loading...</div>;
   if (error) return <div className="try-on-container error">{error}</div>;
 
@@ -129,6 +144,22 @@ const TryOn = () => {
             <h3>Your Photo</h3>
             <div className="upload-wrapper">
               <UploadPhoto onUpload={handlePhotoUpload} />
+              <div className="history-section">
+                <p className="history-title">Or choose an available image</p>
+
+                <div className="history-grid">
+                  {availableImages.map((url) => (
+                    <button
+                      key={url}
+                      type="button"
+                      className={`history-button ${personImageUrl === url ? 'is-selected' : ''}`}
+                      onClick={() => handleAvailableImageSelect(url)}
+                    >
+                      <img src={url} alt="Available option" className="history-image" />
+                    </button>
+                  ))}
+                </div>
+              </div>
               {userPhotoPreview && (
                 <div className="preview-wrapper">
                   <img src={userPhotoPreview} alt="Your uploaded photo" className="user-image" />
