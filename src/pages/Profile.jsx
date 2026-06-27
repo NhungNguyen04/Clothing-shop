@@ -5,6 +5,7 @@ import Spinner from '../components/Spinner';
 import axiosInstance from '../api/axiosInstance';
 import AddressService from '../services/address';
 import DeliveryInformation from '../components/DeliInformation';
+import { Navigate } from 'react-router-dom';
 
 const Profile = () => {
     const { user: authUser } = useAuth();
@@ -45,7 +46,10 @@ const Profile = () => {
 
     useEffect(() => {
         const fetchUser = async () => {
-            if (!authUser?.id) return;
+            if (!authUser?.id) {
+                setLoading(false);
+                return;
+            }
             setLoading(true);
             try {
                 const response = await axiosInstance.get(`/users/${authUser.id}`);
@@ -66,15 +70,19 @@ const Profile = () => {
         };
         
         const fetchAddresses = async () => {
-            if (!authUser?.id) return;
+            if (!authUser?.id) {
+                setLoading(false);
+                return;
+            }
             try {
                 const userAddresses = await AddressService.getUserAddresses(authUser.id);
                 setAddresses(userAddresses);
             } catch (error) {
                 console.error('Failed to load addresses:', error);
+            } finally {
+                setLoading(false);
             }
         };
-        
         fetchUser();
         fetchAddresses();
     }, [authUser]);
@@ -342,6 +350,10 @@ const Profile = () => {
             province: location.province
         }));
     };
+
+    if (!loading && !authUser?.id) {
+        return <Navigate to="/login" replace />;
+    }
 
     if (loading) {
         return <div className="flex justify-center items-center min-h-screen"><Spinner /></div>;

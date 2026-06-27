@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import useAuth from '../hooks/useAuth';
 import Spinner from '../components/Spinner';
 import { OrderService } from '../services/order';
-import { useNavigate } from 'react-router-dom';
+import { Navigate, useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import WebOrderItem from '../components/WebOrderItem';
 
@@ -103,6 +103,10 @@ const Orders = () => {
   };
 
   const filteredOrders = getFilteredOrders();
+
+  if (!loading && !user) {
+    return <Navigate to="/login" replace />;
+  }
 
   return (
     <div className="max-w-5xl mx-auto p-6 bg-white shadow rounded-lg">

@@ -52,9 +52,7 @@ function App() {
   const isAdminRoute = location.pathname.startsWith('/admin');
   const isSellerRoute = location.pathname.startsWith('/seller');
   const { user, isAdmin, isSeller } = useAuth()
-
-  console.log("User state in App.jsx:", user);
-
+  
   return (
     <div className={isAdminRoute || isSellerRoute ? '' : 'px-4 sm:px-[5vw] md:px-[7vw] lg:px-[9vw]'}>
       <ToastContainer />
